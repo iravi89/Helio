@@ -335,6 +335,10 @@ const USERS=[
   {id:"U5",name:"Sneha Kulkarni",email:"sneha@sunrisetextiles.example",role:"customer_admin",org:"Sunrise Textiles",groups:["UG-C0"],direct:[],status:"active",mfa:true,last:"3 h ago",persona:true},
   {id:"U6",name:"Arjun Das",email:"arjun@kavericold.example",role:"viewer",org:"Kaveri Cold Chain",groups:[],direct:SITES.filter(s=>s.customer==="Kaveri Cold Chain").slice(0,6).map(s=>s.id),status:"active",mfa:false,last:"2 days ago",persona:true}];
 const ORGS=["HQ","VoltCare O&M",...CUSTOMERS];
+/* Organisations: every person belongs to exactly one, and it must exist before they can be invited */
+const ORG_TYPES=["Internal","Customer","O&M contractor","Other"];
+const ORG_INFO={HQ:{type:"Internal",domains:["helio.example"],mfa:true,created:"12 Jan 2024",contact:"Ananya Rao"},"VoltCare O&M":{type:"O&M contractor",domains:["voltcare.example"],mfa:true,created:"3 Mar 2024",contact:"Divya Nair"}};
+CUSTOMERS.forEach((c,i)=>ORG_INFO[c]={type:"Customer",domains:[c.split(" ")[0].toLowerCase()+".example"],mfa:i%3===0,created:`${5+i*3} ${["Apr","Jun","Aug","Nov"][i%4]} 2024`,contact:""});
 for(let i=0;i<58;i++){
   const f=FIRST[i%FIRST.length],l=pick(LAST),org=pick(ORGS);
   let role,groups;
@@ -440,12 +444,13 @@ const ICON={
   groups:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
   roles:'<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>',
   support:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"/>',
+  orgs:'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h2M13 9h2M9 13h2M13 13h2M10 21v-4h4v4"/>',
   renewals:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',
   spark:'<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.5"/>',
   audit:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>'};
 const svgI=(k,s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 const NAV=[["Monitor",[["overview","Overview","view_dash"],["sites","Sites","view_dash"],["reports","Reports","view_dash"],["alarms","Alarms","view_dash"],["support","Support","view_dash"]]],
-  ["Administration",[["users","Users","manage_users"],["groups","Groups and access","manage_users"],["roles","Roles","manage_users"],["renewals","Renewals","manage_billing"],["audit","Audit log","view_audit"]]]];
+  ["Administration",[["orgs","Organisations","manage_users"],["users","Users","manage_users"],["groups","Groups and access","manage_users"],["roles","Roles","manage_users"],["renewals","Renewals","manage_billing"],["audit","Audit log","view_audit"]]]];
 
 function shell(inner){
   const u=me(),r=myRole(),sc=scope();
@@ -611,9 +616,9 @@ function vUsers(){
   const list=manageableUsers(),q=state.userQ.toLowerCase();const rows=list.filter(u=>!q||(u.name+u.email+u.org+roleById(u.role).name).toLowerCase().includes(q));
   const reqs=me().role==="platform_admin"?REQUESTS:REQUESTS.filter(r=>r.org===me().org);
   const tab=state.userTab;
-  const head=pageHead("Users",me().role==="platform_admin"?`${list.length} people across ${ORGS.length} organisations`:`${list.length} people in ${esc(me().org)}. Customer Admins only see their own organisation.`,`<button class="btn primary" data-action="invite">Invite user</button>`);
+  const head=pageHead("Users",me().role==="platform_admin"?`${list.length} people across ${ORGS.length} organisations`:`${list.length} people in ${esc(me().org)}. Customer Admins only see their own organisation.`,`${me().role==="platform_admin"?`<button class="btn" data-action="neworg">Add organisation</button>`:""}<button class="btn primary" data-action="invite">Invite user</button>`);
   const tabs=`<div class="tabs" role="tablist">${[["people","People"],["requests",`Registration requests (${reqs.length})`]].map(([k,l])=>`<button role="tab" data-utab="${k}" aria-selected="${tab===k}">${l}</button>`).join("")}</div>`;
-  if(tab==="requests")return head+`<section class="panel">${tabs}<div style="margin-top:12px">${reqs.length?`<div class="tbl-wrap"><table><thead><tr><th>Person</th><th>Organisation</th><th>Reason given</th><th>Requested</th><th></th></tr></thead><tbody>${reqs.map(r=>`<tr><td><div class="site-name">${esc(r.name)}</div><div class="sub">${esc(r.email)}</div></td><td>${esc(r.org)}${r.org==="Unknown"?' <span class="chip sev-critical plain">Unverified domain</span>':""}</td><td style="white-space:normal;min-width:220px">${esc(r.note)}</td><td class="sub">${r.when}</td><td><span class="filters" style="flex-wrap:nowrap"><button class="btn primary" data-approve="${r.id}" ${can("approve_reg")?"":"disabled"}>Review</button><button class="btn danger" data-reject="${r.id}" ${can("approve_reg")?"":"disabled"}>Reject</button></span></td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">No pending requests.</p>`}</div>
+  if(tab==="requests")return head+`<section class="panel">${tabs}<div style="margin-top:12px">${reqs.length?`<div class="tbl-wrap"><table><thead><tr><th>Person</th><th>Organisation</th><th>Reason given</th><th>Requested</th><th></th></tr></thead><tbody>${reqs.map(r=>`<tr><td><div class="site-name">${esc(r.name)}</div><div class="sub">${esc(r.email)}</div></td><td>${esc(r.org)}${r.org==="Unknown"?' <span class="chip sev-critical plain">Unverified domain</span>':!ORGS.includes(r.org)?' <span class="chip sev-major plain">Organisation not added yet</span>':""}</td><td style="white-space:normal;min-width:220px">${esc(r.note)}</td><td class="sub">${r.when}</td><td><span class="filters" style="flex-wrap:nowrap"><button class="btn primary" data-approve="${r.id}" ${can("approve_reg")?"":"disabled"}>Review</button><button class="btn danger" data-reject="${r.id}" ${can("approve_reg")?"":"disabled"}>Reject</button></span></td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">No pending requests.</p>`}</div>
     <p class="hint" style="margin-top:12px">People can request access from the sign-in page. Nothing is visible to them until an admin approves the request and assigns a role and at least one group.</p></section>`;
   return head+`<section class="panel">${tabs}<div class="filters" style="margin:12px 0"><input id="uq" type="search" placeholder="Search name, email, organisation, role" value="${esc(state.userQ)}" style="flex:1 1 240px"></div>
   <div class="tbl-wrap"><table><thead><tr><th>Person</th><th>Role</th><th>Organisation</th><th>Groups</th><th class="r">Sites</th><th>Status</th><th>2FA</th><th>Last active</th></tr></thead><tbody>
@@ -676,15 +681,49 @@ function userDrawer(id){
   ${u.id===me().id?'<p class="hint">You can\'t change your own role or groups. Ask another admin.</p>':""}`);
 }
 function inviteDrawer(prefill){
-  const grpList=me().role==="platform_admin"?UG:UG.filter(g=>g.id==="UG-C"+CUSTOMERS.indexOf(me().org));
-  openDrawer(dHead(prefill?"Approve access request":"Invite user",prefill?esc(prefill.note):"They'll get an email link to set a password and turn on two-factor sign-in.")+
+  const isReq=!!(prefill&&prefill.id),isPA=me().role==="platform_admin",orgs=isPA?ORGS:[me().org];
+  const org=prefill&&ORGS.includes(prefill.org)?prefill.org:isPA?"":me().org;
+  const grpList=isPA?UG:UG.filter(g=>g.id==="UG-C"+CUSTOMERS.indexOf(me().org));
+  const own=o=>CUSTOMERS.includes(o)?"UG-C"+CUSTOMERS.indexOf(o):null;
+  openDrawer(dHead(isReq?"Approve access request":"Invite user",isReq?esc(prefill.note):"They'll get an email link to set a password and turn on two-factor sign-in.")+
   `<form id="inviteform" style="display:grid;gap:14px">
-  <div class="field"><label for="iname">Full name</label><input id="iname" required value="${prefill?esc(prefill.name):""}"></div>
-  <div class="field"><label for="iemail">Work email</label><input id="iemail" type="email" required value="${prefill?esc(prefill.email):""}"></div>
-  <div class="field"><label for="iorg">Organisation</label><select id="iorg" ${me().role!=="platform_admin"?"disabled":""}>${(me().role==="platform_admin"?ORGS:[me().org]).map(o=>`<option ${prefill&&prefill.org===o?"selected":""}>${esc(o)}</option>`).join("")}</select></div>
-  <div class="field"><label for="irole">Role</label><select id="irole">${assignableRoles().map(r=>`<option value="${r.id}" ${prefill&&prefill.suggest===r.id?"selected":""}>${r.name}</option>`).join("")}</select></div>
-  <div class="field"><span style="font-weight:600">User groups</span><div class="checks">${grpList.map(g=>`<label><input type="checkbox" data-igroup="${g.id}" ${grpList.length===1?"checked":""}> ${esc(g.name)}</label>`).join("")}</div></div>
-  <button class="btn primary" type="submit" data-req="${prefill?prefill.id:""}">${prefill?"Approve and send invite":"Send invite"}</button></form>`);
+  <div class="field"><label for="iorg">Organisation</label><select id="iorg" ${isPA?"":"disabled"}>${isPA?`<option value="" ${org?"":"selected"}>Choose an organisation</option>`:""}${orgs.map(o=>`<option ${o===org?"selected":""}>${esc(o)}</option>`).join("")}</select>
+    ${isPA?`<span class="sub">${isReq&&!ORGS.includes(prefill.org)?`<b>${esc(prefill.org)}</b> is not set up yet. `:""}Not in the list? <button type="button" class="link" style="margin:0" data-action="neworg">Add the organisation first</button></span>`:`<span class="sub">You can only invite people into ${esc(me().org)}.</span>`}</div>
+  <div class="field"><label for="iname">Full name</label><input id="iname" required value="${isReq?esc(prefill.name):""}"></div>
+  <div class="field"><label for="iemail">Work email</label><input id="iemail" type="email" required value="${isReq?esc(prefill.email):""}"><span class="sub" id="idomain">${org&&ORG_INFO[org]?`Expected domain: ${ORG_INFO[org].domains.map(esc).join(", ")}`:""}</span></div>
+  <div class="field"><label for="irole">Role</label><select id="irole">${assignableRoles().map(r=>`<option value="${r.id}" ${isReq&&prefill.suggest===r.id?"selected":""}>${r.name}</option>`).join("")}</select></div>
+  <div class="field"><span style="font-weight:600">User groups</span><div class="checks">${grpList.map(g=>`<label><input type="checkbox" data-igroup="${g.id}" ${grpList.length===1||g.id===own(org)?"checked":""}> ${esc(g.name)}</label>`).join("")}</div></div>
+  <button class="btn primary" type="submit" data-req="${isReq?prefill.id:""}">${isReq?"Approve and send invite":"Send invite"}</button></form>`);
+}
+const orgPeople=o=>USERS.filter(u=>u.org===o);
+const orgSites=o=>{const ids=new Set();orgPeople(o).forEach(u=>accessibleSiteIds(u).forEach(i=>ids.add(i)));if(CUSTOMERS.includes(o))SITES.filter(x=>x.customer===o).forEach(x=>ids.add(x.id));return SITES.filter(x=>ids.has(x.id)&&!x.archived)};
+function vOrgs(){
+  if(!can("manage_users"))return pageHead("Organisations")+locked("Organisations");
+  const isPA=me().role==="platform_admin",list=isPA?ORGS:[me().org];
+  return pageHead("Organisations",isPA?"Every person belongs to one organisation. Add the organisation first, then its sites and people.":"Your organisation. Only a Platform Admin can add organisations.",isPA?`<button class="btn primary" data-action="neworg">Add organisation</button>`:"")+
+  `<section class="panel"><div class="tbl-wrap"><table><thead><tr><th>Organisation</th><th>Type</th><th class="r">People</th><th class="r">Sites</th><th>Two-factor</th><th>Added</th></tr></thead><tbody>
+  ${list.map(o=>{const i=ORG_INFO[o]||{type:"Other",domains:[]},pp=orgPeople(o);return`<tr class="click" data-org="${esc(o)}" tabindex="0"><td><div class="site-name">${esc(o)}</div><div class="sub">${i.domains.map(esc).join(", ")||"no email domain set"}</div></td><td><span class="chip plain ${i.type==="Customer"?"role":i.type==="Internal"?"s-online":"s-degraded"}">${i.type}</span></td><td class="r num">${pp.filter(u=>u.status==="active").length}<span class="sub"> / ${pp.length}</span></td><td class="r num">${orgSites(o).length}</td><td>${i.mfa?'<span class="yes">Required</span>':'<span class="no">Optional</span>'}</td><td class="sub">${i.created}</td></tr>`}).join("")}
+  </tbody></table></div>
+  <p class="hint" style="margin-top:12px">Customer organisations get their own site group and a "team" user group automatically, so their people only ever see their own sites. Contractors and internal teams are given sites through user groups.</p></section>`;
+}
+function orgDrawer(o){
+  const i=ORG_INFO[o]||{type:"Other",domains:[]},pp=orgPeople(o),isPA=me().role==="platform_admin",ns=orgSites(o).length;
+  openDrawer(dHead(esc(o),`${i.type} · ${pp.length} people · ${ns} sites`)+
+  `<dl class="kv"><dt>Email domains</dt><dd>${i.domains.map(esc).join(", ")||"–"}</dd><dt>Two-factor sign-in</dt><dd>${i.mfa?"Required for everyone":"Optional"}</dd><dt>Main contact</dt><dd>${esc(i.contact||"–")}</dd><dt>Added</dt><dd>${i.created}</dd>${i.type==="Customer"?`<dt>Groups</dt><dd><span class="tag">${esc(o)} (site group)</span><span class="tag">${esc(o)} team</span></dd>`:""}</dl>
+  ${!ns&&i.type==="Customer"?`<div class="notice warn"><b>No sites yet.</b> Add this customer's sites so their people have something to see.</div>`:""}
+  <div class="filters">${isPA?`<button class="btn" data-orgedit="${esc(o)}">Edit</button>`:""}${i.type==="Customer"&&can("edit_sites")?`<button class="btn" data-orgsite="${esc(o)}">Add a site</button>`:""}<button class="btn primary" data-orginvite="${esc(o)}">Invite someone</button></div>
+  <div class="field"><span style="font-weight:600">People (${pp.length})</span><div class="tbl-wrap" style="margin:0;max-height:320px"><table><tbody>${pp.map(u=>`<tr class="click" data-user="${u.id}"><td>${esc(u.name)}<div class="sub">${esc(u.email)}</div></td><td><span class="chip role plain">${roleById(u.role).name}</span></td><td class="sub">${u.status}</td></tr>`).join("")||'<tr><td class="muted">Nobody yet. Invite the first person.</td></tr>'}</tbody></table></div></div>`);
+}
+function orgForm(o){
+  const i=o?ORG_INFO[o]:{type:"Customer",domains:[],mfa:false,contact:""};
+  openDrawer(dHead(o?"Edit "+esc(o):"Add organisation",o?"":"Add the organisation before inviting its people. Customers also get a site group and a team group.")+
+  `<form id="orgform" data-org="${o?esc(o):""}" style="display:grid;gap:14px">
+  <div class="field"><label for="oname">Name</label><input id="oname" value="${o?esc(o):""}" ${o?"disabled":""} placeholder="e.g. Shakti Steel Works" autocomplete="off"></div>
+  <div class="field"><label for="otype">Type</label><select id="otype" ${o?"disabled":""}>${ORG_TYPES.map(t=>`<option ${t===i.type?"selected":""}>${t}</option>`).join("")}</select><span class="sub">Customer: owns sites. O&amp;M contractor: maintains other people's sites. Internal: your own staff.</span></div>
+  <div class="field"><label for="odom">Email domains</label><input id="odom" value="${i.domains.join(", ")}" placeholder="shaktisteel.com" autocomplete="off"><span class="sub">Invites and access requests from other domains get a warning. Separate several with commas.</span></div>
+  <div class="field"><label for="ocontact">Main contact</label><input id="ocontact" value="${esc(i.contact||"")}" autocomplete="off"></div>
+  <label class="check-row"><input type="checkbox" id="omfa" ${i.mfa?"checked":""}> Require two-factor sign-in for everyone in this organisation</label>
+  <button class="btn primary" type="submit">${o?"Save":"Add organisation"}</button></form>`);
 }
 function ugDrawer(id){
   const g=UG.find(x=>x.id===id),mem=USERS.filter(u=>u.groups.includes(g.id)),isPA=me().role==="platform_admin";
@@ -1198,7 +1237,7 @@ function vSiteReport(){
 /* ---------- Render + events ---------- */
 let toastT;function toast(m){clearTimeout(toastT);let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";t.setAttribute("role","status");document.body.appendChild(t)}t.textContent=m;toastT=setTimeout(()=>t.remove(),2600)}
 function log(action,target){AUDIT.push({when:new Date(TODAY.getTime()+NOW_H*3600e3+AUDIT.length*1000),actor:me().name,action,target,ip:"49.36.88.10"})}
-const VIEWS={siteForm:vSiteForm,overview:vOverview,sites:vSites,site:vSite,reports:vReports,alarms:vAlarms,support:vSupport,renewals:vRenewals,users:vUsers,groups:vGroups,roles:vRoles,audit:vAudit};
+const VIEWS={siteForm:vSiteForm,overview:vOverview,sites:vSites,site:vSite,reports:vReports,alarms:vAlarms,support:vSupport,orgs:vOrgs,renewals:vRenewals,users:vUsers,groups:vGroups,roles:vRoles,audit:vAudit};
 function render(){
   const root=document.getElementById("root");
   if(!state.loggedIn){root.innerHTML=vLogin();drawSky();return}
@@ -1211,9 +1250,13 @@ function drawSky(){const c=document.getElementById("sky");if(!c)return;const r=c
   for(let i=0;i<SITES.length;i++){const s=SITES[i];const px=(s.lng-68)/25*r.width,py=(32-s.lat)/24.5*r.height;x.globalAlpha=.25+rr()*.5;x.fillStyle=col;x.beginPath();x.arc(px,py,1.5+Math.sqrt(s.cap)/20,0,7);x.fill()}}
 
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-nav],[data-site],[data-action],[data-sort],[data-page],[data-statusjump],[data-alarmf],[data-ack],[data-period],[data-by],[data-utab],[data-gtab],[data-user],[data-ug],[data-sg],[data-approve],[data-reject],[data-saveuser],[data-suspend],[data-resend],[data-saveug],[data-persona],[data-gres],[data-diag],[data-crange],[data-src],[data-ticket],[data-tickf],[data-treply],[data-tresolve],[data-renewf],[data-renewedit],[data-markpaid],[data-themeopt],[data-rmode],[data-rrange],[data-rint],[data-dl]");
+  const t=e.target.closest("[data-nav],[data-site],[data-action],[data-sort],[data-page],[data-statusjump],[data-alarmf],[data-ack],[data-period],[data-by],[data-utab],[data-gtab],[data-user],[data-ug],[data-sg],[data-approve],[data-reject],[data-saveuser],[data-suspend],[data-resend],[data-saveug],[data-persona],[data-gres],[data-diag],[data-crange],[data-src],[data-ticket],[data-tickf],[data-treply],[data-tresolve],[data-renewf],[data-renewedit],[data-markpaid],[data-themeopt],[data-rmode],[data-rrange],[data-rint],[data-dl],[data-org],[data-orgedit],[data-orgsite],[data-orginvite]");
   if(!t)return;const d=t.dataset;
   if(d.nav)return go(d.nav);
+  if(d.org)return orgDrawer(d.org);
+  if(d.orgedit)return orgForm(d.orgedit);
+  if(d.orginvite)return inviteDrawer({org:d.orginvite});
+  if(d.orgsite){startNewSite();state.draft.customer=d.orgsite;return render()}
   if(d.diag){state.diag=d.diag;return render()}
   if(d.crange){state.chartRange=d.crange;return render()}
   if(d.src){state.hideSrc[d.src]=!state.hideSrc[d.src];return render()}
@@ -1262,6 +1305,7 @@ document.addEventListener("click",e=>{
   if(a==="account")return accountDrawer();
   if(a==="numbers"){state.showNums=!state.showNums;return render()}
   if(a==="invite")return inviteDrawer();
+  if(a==="neworg")return orgForm();
   if(a==="schedule")return scheduleDrawer();
   if(a==="request"){e.preventDefault();toast("The request form would open here");return}
   if(a==="newrole"){toast("New role form would open here");return}
@@ -1270,12 +1314,13 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{
   const id=e.target.id;
-  if(id==="persona"){state.me=e.target.value;scopeCache=null;const v=state.view;return go(["users","groups","roles","audit","support","renewals","reports","alarms"].includes(v)?v:v==="site"?"overview":v,{sitesGroup:"all",rep:{...state.rep,scope:"all"},page:0})}
+  if(id==="persona"){state.me=e.target.value;scopeCache=null;const v=state.view;return go(["orgs","users","groups","roles","audit","support","renewals","reports","alarms"].includes(v)?v:v==="site"?"overview":v,{sitesGroup:"all",rep:{...state.rep,scope:"all"},page:0})}
   if(id==="fstatus"){state.sitesStatus=e.target.value;state.page=0;return render()}
   if(id==="fregion"){state.sitesRegion=e.target.value;state.page=0;return render()}
   if(id==="ftype"){state.sitesType=e.target.value;state.page=0;return render()}
   if(id==="fgroup"){state.sitesGroup=e.target.value;state.page=0;return render()}
   if(id==="rscope"){state.rep.scope=e.target.value;return render()}
+  if(id==="iorg"){const o=e.target.value,g=CUSTOMERS.includes(o)?"UG-C"+CUSTOMERS.indexOf(o):null;document.querySelectorAll("[data-igroup]").forEach(c=>c.checked=c.dataset.igroup===g);document.getElementById("idomain").textContent=o&&ORG_INFO[o]?"Expected domain: "+ORG_INFO[o].domains.join(", "):"";return}
   if(id==="rsite"){state.rep.site=e.target.value;return render()}
   if(id==="rtype"){state.rep.type=e.target.value;return render()}
   if(e.target.dataset.param){const p=e.target.dataset.param,cur=state.rep.params.length?state.rep.params:["Activ_pow","Volt_R","Freq"];state.rep.params=e.target.checked?[...cur.filter(x=>x!==p),p]:cur.filter(x=>x!==p);if(!state.rep.params.length){state.rep.params=[p];toast("Keep at least one parameter")}return render()}
@@ -1293,6 +1338,18 @@ document.addEventListener("input",e=>{
 });
 document.addEventListener("submit",e=>{
   e.preventDefault();const f=e.target;
+  if(f.id==="orgform"){const editing=f.dataset.org,name=editing||document.getElementById("oname").value.trim().replace(/\s+/g," "),type=editing?ORG_INFO[editing].type:document.getElementById("otype").value;
+    const doms=document.getElementById("odom").value.split(",").map(x=>x.trim().toLowerCase().replace(/^@/,"")).filter(Boolean);
+    if(!name){toast("Give the organisation a name");return}
+    if(!editing&&ORGS.some(o=>o.toLowerCase()===name.toLowerCase())){toast(`${name} already exists`);return}
+    const bad=doms.find(x=>!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(x));if(bad){toast(`"${bad}" is not a valid domain`);return}
+    const taken=doms.find(x=>ORGS.some(o=>o!==editing&&(ORG_INFO[o]||{domains:[]}).domains.includes(x)));if(taken){toast(`${taken} already belongs to another organisation`);return}
+    const info={...(ORG_INFO[editing]||{created:"2 Oct 2026"}),type,domains:doms,mfa:document.getElementById("omfa").checked,contact:document.getElementById("ocontact").value.trim()};
+    if(editing){ORG_INFO[editing]=info;log("Edited organisation",`${editing}: ${doms.join(", ")||"no domain"}, 2FA ${info.mfa?"required":"optional"}`);toast("Saved");render();return orgDrawer(editing)}
+    ORGS.push(name);ORG_INFO[name]=info;
+    if(type==="Customer"){CUSTOMERS.push(name);const i=CUSTOMERS.length-1;SG.push({id:"SG-C"+i,name,kind:"Customer",sites:[]});UG.push({id:"UG-C"+i,name:name+" team",desc:"Customer's own staff",siteGroups:["SG-C"+i]})}
+    log("Added organisation",`${name} (${type})`);toast(type==="Customer"?`${name} added. Next, add their sites and invite their people`:`${name} added. You can invite their people now`);
+    if(state.view==="orgs")render();return orgDrawer(name)}
   if(f.id==="ticketform"){const sub=document.getElementById("tsub").value.trim(),body=document.getElementById("tbody").value.trim(),sid=document.getElementById("tsite").value,cat=document.getElementById("tcat").value;
     if(!sub){toast("Please add a short subject");return}if(!body){toast("Please describe what is happening");return}
     const s=sid&&siteById(sid),t={id:"T-"+(1041+TICKETS.length),site:sid||null,cat,subject:sub,status:"open",by:me().id,when:"just now",msgs:[{who:me().name,text:body,when:"just now"},{who:"Automatic check",auto:true,text:s?autoCheck(s,cat):"Sent to an administrator, who will reply here.",when:"just now"}]};
@@ -1306,10 +1363,14 @@ document.addEventListener("submit",e=>{
     log("Changed password",me().email);closeDrawer();toast("Password changed. Other sessions were signed out");return}
   if(f.id==="loginform"){toast("Pick a demo person to sign in");return}
   if(f.id==="schedform"){log("Scheduled report",document.getElementById("sfreq").value);closeDrawer();toast("Report scheduled");return}
-  if(f.id==="inviteform"){const name=document.getElementById("iname").value.trim(),email=document.getElementById("iemail").value.trim();if(!name||!email)return;
+  if(f.id==="inviteform"){const name=document.getElementById("iname").value.trim(),email=document.getElementById("iemail").value.trim(),org=document.getElementById("iorg").value;
+    if(!org||!ORGS.includes(org)){toast("Choose an organisation. If it's new, add it first");document.getElementById("iorg").focus();return}
+    if(!name||!email){toast("Enter their name and work email");return}
+    const dom=(email.split("@")[1]||"").toLowerCase(),od=(ORG_INFO[org]||{domains:[]}).domains;
+    if(od.length&&!od.includes(dom)&&!confirm(`${email} is not on ${org}'s email domain (${od.join(", ")}). Invite anyway?`))return;
     const groups=[...document.querySelectorAll("[data-igroup]")].filter(c=>c.checked).map(c=>c.dataset.igroup);
     if(!groups.length){toast("Pick at least one group so they can see some sites");return}
-    USERS.push({id:"U"+(USERS.length+100),name,email,role:document.getElementById("irole").value,org:document.getElementById("iorg").value,groups,direct:[],status:"invited",mfa:false,last:"Never"});
+    USERS.push({id:"U"+(USERS.length+100),name,email,role:document.getElementById("irole").value,org,groups,direct:[],status:"invited",mfa:false,last:"Never"});
     const rq=f.querySelector("[data-req]").dataset.req;if(rq){REQUESTS.splice(REQUESTS.findIndex(r=>r.id===rq),1);log("Approved registration",email)}else log("Invited user",email);
     closeDrawer();toast(rq?"Approved. Invite sent":"Invite sent");state.userTab="people";render()}
 });

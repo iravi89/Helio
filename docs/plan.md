@@ -36,6 +36,7 @@ Roles are editable (custom roles allowed); Platform Admin is fixed.
 
 ## 2. User registry
 
+- Organisations come first. A Platform Admin adds the organisation (name, type, email domains, main contact, whether two-factor is required) before anyone from it can be invited or approved. Adding a customer organisation also creates its site group and its "team" user group. Invites warn when the email is not on the organisation's domain.
 - Invite by email (admin), or self-service "Request access" from the sign-in page → lands in a review queue. Nothing is visible until an admin approves and assigns a role plus at least one group.
 - Statuses: Invited, Active, Suspended. Suspending ends sessions immediately.
 - Two-factor sign-in, enforceable per role (on by default for admins).
