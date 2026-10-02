@@ -148,6 +148,42 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface-2)}
 .card .meta b{color:var(--ink);font-family:var(--f-mono)}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.86rem}
 .kv dt{color:var(--muted)} .kv dd{margin:0}
+.form{display:grid;gap:16px}
+.form-grid .field{align-content:start}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+.form-grid .wide{grid-column:1/-1}
+.field input:not([type=checkbox]):not([type=radio]),.field select,.field textarea{width:100%}
+.field textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);resize:vertical}
+.field input:disabled{background:var(--surface-2);color:var(--muted)}
+.unit{display:flex;align-items:stretch}
+.unit input{border-top-right-radius:0!important;border-bottom-right-radius:0!important;min-width:0}
+.unit span{display:flex;align-items:center;padding:0 10px;border:1px solid var(--line);border-left:0;border-radius:0 8px 8px 0;background:var(--surface-2);color:var(--muted);font-size:.8rem;white-space:nowrap}
+.check-row{display:flex;gap:8px;align-items:center;grid-column:1/-1}
+.stepper{list-style:none;margin:0;padding:0;display:flex;gap:4px;overflow-x:auto}
+.stepper li{flex:1 0 auto}
+.stepper button{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:.84rem;color:var(--muted);font-weight:500;white-space:nowrap;width:100%;box-sizing:border-box}
+.stepper button:hover{background:var(--surface-2)}
+.stepper button:focus-visible{outline:2px solid var(--accent)}
+.stepper .dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line);font-family:var(--f-mono);font-size:.75rem;flex:none}
+.stepper button[aria-current="step"]{color:var(--ink);background:var(--surface)}
+.stepper button[aria-current="step"] .dot{background:var(--accent);border-color:var(--accent);color:#2A1B00}
+.stepper button.done .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+.form-foot{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:14px;flex-wrap:wrap}
+.choice{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.opt{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:4px;cursor:pointer;align-content:start}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt.on{border-color:var(--brand);background:var(--brand-soft)}
+.opt:focus-within{outline:2px solid var(--accent)}
+.notice{border-radius:8px;padding:10px 14px;font-size:.86rem}
+.notice ul{margin:4px 0 0;padding-left:18px}
+.notice.bad{background:var(--bad-soft);color:var(--ink);border:1px solid var(--bad)}
+.notice.warn{background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn)}
+table.edit td{padding:5px 6px}
+table.edit input{padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.rev-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rev{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+@media (max-width:1100px){.choice{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.form-grid,.rev-grid,.choice{grid-template-columns:minmax(0,1fr)}}
 .mobile-only{display:none}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:50;font-size:.86rem;box-shadow:var(--shadow)}
 .back{all:unset;cursor:pointer;color:var(--muted);font-size:.84rem}
@@ -316,7 +352,7 @@ function accessibleSiteIds(u){
   return set;
 }
 let scopeCache=null;
-const scope=()=>{if(!scopeCache){const ids=accessibleSiteIds(me());scopeCache=SITES.filter(s=>ids.has(s.id))}return scopeCache};
+const scope=()=>{if(!scopeCache){const ids=accessibleSiteIds(me());scopeCache=SITES.filter(s=>ids.has(s.id)&&!s.archived)}return scopeCache};
 const visibleSG=()=>{const ids=new Set(scope().map(s=>s.id));return SG.filter(g=>g.sites.some(id=>ids.has(id)))};
 const manageableUsers=()=>{const u=me();if(u.role==="platform_admin")return USERS;if(u.role==="customer_admin")return USERS.filter(x=>x.org===u.org);return[]};
 const assignableRoles=()=>me().role==="platform_admin"?ROLES:ROLES.filter(r=>["viewer","finance","engineer","portfolio"].includes(r.id));
@@ -394,7 +430,7 @@ function shell(inner){
   const openAl=ALARMS.filter(a=>a.state==="open"&&sc.some(s=>s.id===a.site)).length;
   return`<div class="app"><aside class="side">
     <div class="logo"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="7" fill="var(--accent)"/><g stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round"><path d="M16 2v4M16 26v4M2 16h4M26 16h4M6.1 6.1l2.8 2.8M23.1 23.1l2.8 2.8M6.1 25.9l2.8-2.8M23.1 8.9l2.8-2.8"/></g></svg>Helio Console</div>
-    <nav class="nav" aria-label="Main">${NAV.map(([lab,items])=>{const vis=items.filter(i=>can(i[2]));return vis.length?`<div class="nav-label">${lab}</div>`+vis.map(([id,name])=>`<button data-nav="${id}" ${state.view===id||(id==="sites"&&state.view==="site")?'aria-current="page"':""}>${svgI(id)}${name}${id==="alarms"&&openAl?`<span class="count">${openAl}</span>`:""}</button>`).join(""):""}).join("")}</nav>
+    <nav class="nav" aria-label="Main">${NAV.map(([lab,items])=>{const vis=items.filter(i=>can(i[2]));return vis.length?`<div class="nav-label">${lab}</div>`+vis.map(([id,name])=>`<button data-nav="${id}" ${state.view===id||(id==="sites"&&["site","siteForm"].includes(state.view))?'aria-current="page"':""}>${svgI(id)}${name}${id==="alarms"&&openAl?`<span class="count">${openAl}</span>`:""}</button>`).join(""):""}).join("")}</nav>
     <div class="me-card"><span class="eyebrow" style="color:inherit">Signed in</span><b>${esc(u.name)}</b><span>${r.name}</span><span>${sc.length} of ${SITES.length} sites · ${esc(u.org)}</span><button class="btn" style="margin-top:6px;background:transparent;color:inherit;border-color:var(--side-line)" data-action="logout">Sign out</button></div>
   </aside><div class="main">
     <header class="top"><div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="gsearch" type="search" placeholder="Jump to a site, city or customer" autocomplete="off" aria-label="Search sites"><div id="gresults"></div></div>
@@ -451,7 +487,7 @@ function vSites(){
   const list=filteredSites(),per=25,pages=Math.max(1,Math.ceil(list.length/per));state.page=Math.min(state.page,pages-1);
   const rows=list.slice(state.page*per,state.page*per+per);const fin=can("view_financials");
   const th=(k,l,r)=>`<th class="sortable ${r?"r":""}" data-sort="${k}" aria-sort="${state.sort===k?(state.dir>0?"ascending":"descending"):"none"}">${l}${state.sort===k?(state.dir>0?" ↑":" ↓"):""}</th>`;
-  return pageHead("Sites",`${list.length} of ${scope().length} sites in your access`)+
+  return pageHead("Sites",`${list.length} of ${scope().length} sites in your access`,can("edit_sites")?`<button class="btn" data-sfaction="bulk">Import CSV</button><button class="btn primary" data-sfaction="new">Add site</button>`:"")+
   `<section class="panel"><div class="filters" style="margin-bottom:12px">
     <input id="sq" type="search" placeholder="Filter by name, city, customer" value="${esc(state.sitesQ)}" style="flex:1 1 200px">
     <select id="fstatus" aria-label="Status"><option value="all">All statuses</option>${Object.entries(STATUS_LABEL).map(([k,v])=>`<option value="${k}" ${state.sitesStatus===k?"selected":""}>${v}</option>`).join("")}</select>
@@ -476,7 +512,7 @@ function vSite(){
   const pts=DAYS.map((d,i)=>({label:dlabel(d),a:s.daily[i].e||0,b:s.daily[i].exp,gap:s.daily[i].gap}));
   const access=USERS.filter(u=>accessibleSiteIds(u).has(s.id));
   return`<button class="back" data-nav="sites">← All sites</button>`+
-  pageHead(esc(s.name),`${s.id} · ${s.type} · ${s.city}, ${s.state} · ${esc(s.customer)}`,statusChip(s.status))+
+  pageHead(esc(s.name),`${s.id} · ${s.type} · ${s.city}, ${s.state} · ${esc(s.customer)}`,statusChip(s.status)+(can("edit_sites")?`<button class="btn" data-sfaction="edit">Site settings</button>`:""))+(s.isNew?`<div class="notice warn"><b>Waiting for the first readings.</b> New sites usually start reporting within 15 minutes of the data connection going live. Charts fill in from then.</div>`:"")+
   `<div class="kpis">
     <div class="kpi"><span class="eyebrow">Live power</span><span class="v num">${s.status==="comms"?"–":fmtP(s.nowKW)}</span><span class="d">${s.status==="comms"?"last data "+s.lastSeen:pct(s.nowKW/s.cap)+" of capacity"}</span></div>
     <div class="kpi"><span class="eyebrow">Energy today</span><span class="v num">${fmtE(s.todayE)}</span><span class="d">expected ${fmtE(s.todayExp)} by sunset</span></div>
@@ -493,7 +529,7 @@ function vSite(){
   ${can("view_devices")?`<div class="inv-grid">${inverters(s).map(v=>`<div class="inv ${v.st==="ok"?"":v.st}"><span class="eyebrow">${v.name}</span><b>${fmtP(v.kw)}</b><span class="muted">${fmtE(v.today)} today · ${v.temp}°C</span>${v.al?`<span style="color:var(--${v.st==="bad"?"bad":"warn"})">${esc(v.al.type)}</span>`:""}</div>`).join("")}</div>`:`<p class="hint">Device detail is hidden for ${myRole().name}. Site totals above are still accurate.</p>`}</section>
   <div class="grid g-2">
     <section class="panel"><div class="panel-head"><h2>Alarms</h2><span class="muted">${al.filter(a=>a.state==="open").length} open</span></div>${al.length?alarmTable(al,false):`<p class="muted">No alarms in the last 3 days.</p>`}</section>
-    <section class="panel"><div class="panel-head"><h2>Site details</h2>${can("edit_sites")?`<button class="btn" data-action="editsite">Edit</button>`:""}</div>
+    <section class="panel"><div class="panel-head"><h2>Site details</h2>${can("edit_sites")?`<button class="btn" data-sfaction="edit">Settings</button>`:""}</div>
       <dl class="kv"><dt>Commissioned</dt><dd>${s.commissioned.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}</dd><dt>Coordinates</dt><dd class="mono">${s.lat.toFixed(3)}°N, ${s.lng.toFixed(3)}°E</dd><dt>Site groups</dt><dd>${SG.filter(g=>g.sites.includes(s.id)).map(g=>`<span class="tag">${esc(g.name)}</span>`).join("")}</dd>${fin?`<dt>Tariff</dt><dd>₹${s.tariff}/kWh</dd>`:""}
       ${can("manage_users")?`<dt>People with access</dt><dd>${access.length} users <span class="sub">(${[...new Set(access.map(u=>roleById(u.role).name))].join(", ")})</span></dd>`:""}</dl></section>
   </div>`;
@@ -647,14 +683,205 @@ function scheduleDrawer(){
   <button class="btn primary" type="submit">Schedule</button></form>`);
 }
 
+/* ---------- Add and configure sites ---------- */
+const VENDORS=["Huawei FusionSolar","Sungrow iSolarCloud","SMA Sunny Portal","Solis Cloud","Growatt ShineServer","Delta DSS","Fronius Solar.web"];
+const INV_MODELS={"Huawei FusionSolar":["SUN2000-50KTL","SUN2000-100KTL","SUN2000-215KTL"],"Sungrow iSolarCloud":["SG50CX","SG110CX","SG250HX"],"SMA Sunny Portal":["STP 50-41","STP 110-60","Sunny Central 2500"],"Solis Cloud":["S5-GC50K","S5-GC100K","S6-GU350K"],"Growatt ShineServer":["MAX 50KTL3","MAX 100KTL3","MAX 125KTL3"],"Delta DSS":["M50A","M80U","M125HV"],"Fronius Solar.web":["Tauro 50","Tauro ECO 100","Symo 20"]};
+const STEPS=[["basics","Basics"],["plant","Plant"],["data","Data connection"],["devices","Devices"],["targets","Targets and alarms"],["access","Access"],["review","Review"]];
+const MOUNTS=["Fixed tilt","East-west","Single-axis tracker","Seasonal tilt"];
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const getP=(o,p)=>p.split(".").reduce((a,k)=>a==null?a:a[k],o);
+const setP=(o,p,v)=>{const ks=p.split(".");let a=o;ks.slice(0,-1).forEach(k=>a=a[k]);a[ks[ks.length-1]]=v};
+
+function ensureConfig(s){
+  if(s.cfg)return s.cfg;
+  const rr=mulberry32(s.idx*53+11),vendor=VENDORS[Math.floor(rr()*VENDORS.length)],per=Math.round(s.cap*.85/s.inv);
+  const model=INV_MODELS[vendor][s.type==="Ground-mount"?2:per>80?1:0];
+  s.cfg={address:`Plot ${10+Math.floor(rr()*180)}, Industrial Area`,pincode:String(400000+Math.floor(rr()*99999)),contactName:pick(FIRST)+" "+pick(LAST),contactPhone:"+91 98"+String(Math.floor(rr()*1e8)).padStart(8,"0"),
+    acCap:Math.round(s.cap*.85),moduleMake:pick(["Waaree","Adani Solar","Vikram Solar","Tata Power Solar","Renewsys"]),moduleWp:pick([540,545,550,580]),mount:s.type==="Ground-mount"&&rr()<.4?"Single-axis tracker":s.type==="Carport"?"Fixed tilt":pick(["Fixed tilt","East-west"]),
+    tilt:Math.round(10+rr()*12),azimuth:180,source:rr()<.75?"vendor":"modbus",vendor,plantCode:String(Math.floor(1e7+rr()*9e7)),apiSaved:true,gateway:"GW-"+Math.floor(1e5+rr()*9e5),gatewayIp:"192.168.1."+(20+Math.floor(rr()*200)),poll:15,
+    inverters:[...Array(s.inv)].map((_,i)=>({name:"INV-"+String(i+1).padStart(2,"0"),make:vendor.split(" ")[0],model,kw:per,serial:vendor.slice(0,2).toUpperCase()+Math.floor(1e9+rr()*9e9)})),
+    meterMake:pick(["Secure Elite 440","L&T ER300P","Schneider PM5560"]),meterSerial:"MTR"+Math.floor(1e6+rr()*9e6),ctRatio:pick(["200/5","400/5","800/5","1600/5"]),weather:s.cap>=500,weatherMake:"Kipp & Zonen SMP10",
+    targetPR:80,expMethod:s.cap>=500?"irradiance":"pvsyst",budgetYield:+(RY[s.region]*.95).toFixed(2),billing:pick(["PPA","Net metering","Captive"]),
+    offlineMin:30,commsMin:120,prDrop:8,invTemp:75,notify:["UG1"]};
+  s.cfg.moduleCount=Math.round(s.cap*1000/s.cfg.moduleWp);
+  return s.cfg;
+}
+function draftFrom(s){
+  if(!s){const c=CITIES[0],cust=allowedCustomers()[0];
+    return{isNew:true,name:"",customer:cust,type:"Rooftop",city:c[0],state:c[1],region:c[2],lat:c[3],lng:c[4],commissioned:iso(TODAY),address:"",pincode:"",contactName:"",contactPhone:"",
+      cap:"",acCap:"",moduleMake:"",moduleWp:550,moduleCount:"",mount:"Fixed tilt",tilt:15,azimuth:180,source:"vendor",vendor:VENDORS[0],plantCode:"",apiSaved:false,apiKey:"",gateway:"",gatewayIp:"",poll:15,
+      inverters:[],meterMake:"",meterSerial:"",ctRatio:"400/5",weather:false,weatherMake:"",targetPR:80,expMethod:"pvsyst",budgetYield:4.6,tariff:5.5,billing:"PPA",
+      offlineMin:30,commsMin:120,prDrop:8,invTemp:75,notify:["UG1"],groups:[],tested:false}}
+  const c=ensureConfig(s);
+  return JSON.parse(JSON.stringify({...c,id:s.id,isNew:false,name:s.name,customer:s.customer,type:s.type,city:s.city,state:s.state,region:s.region,lat:+s.lat.toFixed(4),lng:+s.lng.toFixed(4),
+    commissioned:iso(s.commissioned),cap:s.cap,tariff:s.tariff,groups:SG.filter(g=>g.kind==="Custom"&&g.sites.includes(s.id)).map(g=>g.id),apiKey:"",tested:true}));
+}
+function allowedCustomers(){if(me().role==="platform_admin")return CUSTOMERS;const set=new Set(scope().map(s=>s.customer));return CUSTOMERS.filter(c=>set.has(c))}
+
+function checkStep(d,step){
+  const e=[],w=[];
+  if(step==="basics"){if(!d.name.trim())e.push("Give the site a name.");else if(SITES.some(s=>s.name.toLowerCase()===d.name.trim().toLowerCase()&&s.id!==d.id))e.push("Another site already has this name.");
+    if(!(d.lat>=6&&d.lat<=37&&d.lng>=68&&d.lng<=98))e.push("Coordinates must be inside India (lat 6–37, long 68–98).");}
+  if(step==="plant"){if(!(+d.cap>0))e.push("Enter the DC capacity in kWp.");if(!(+d.acCap>0))e.push("Enter the AC capacity in kW.");
+    const r=d.cap/d.acCap;if(+d.cap>0&&+d.acCap>0&&(r<1||r>1.5))w.push(`DC/AC ratio is ${r.toFixed(2)}. Most plants sit between 1.1 and 1.4.`);
+    const mk=d.moduleCount*d.moduleWp/1000;if(d.moduleCount&&+d.cap>0&&Math.abs(mk/d.cap-1)>.03)w.push(`${d.moduleCount} modules × ${d.moduleWp} Wp = ${mk.toFixed(1)} kWp, which doesn't match the ${d.cap} kWp entered.`);}
+  if(step==="data"){if(d.source==="vendor"&&!d.plantCode.trim())e.push("Enter the plant ID from the inverter maker's portal.");if(d.source==="vendor"&&!d.apiSaved&&!d.apiKey)e.push("Enter the API key so we can read data.");
+    if(d.source==="modbus"&&!d.gateway.trim())e.push("Enter the gateway serial number.");if(!d.tested&&d.source!=="csv")w.push("Connection not tested yet.");}
+  if(step==="devices"){if(!d.inverters.length&&d.source!=="csv")e.push("Add at least one inverter, or use Test connection to find them.");
+    const sum=d.inverters.reduce((a,v)=>a+(+v.kw||0),0);if(d.inverters.length&&+d.acCap>0&&Math.abs(sum/d.acCap-1)>.05)w.push(`Inverters add up to ${sum} kW but the AC capacity is ${d.acCap} kW.`);
+    if(new Set(d.inverters.map(v=>v.name)).size!==d.inverters.length)e.push("Two inverters share a name.");}
+  if(step==="targets"){if(!(d.targetPR>=50&&d.targetPR<=95))e.push("Target PR should be between 50% and 95%.");}
+  return{e,w};
+}
+const allIssues=d=>STEPS.slice(0,-1).map(([k,l])=>({k,l,...checkStep(d,k)}));
+
+const fid=p=>"sf-"+p.replace(/\./g,"-");
+const fIn=(d,p,type="text",extra="")=>`<input id="${fid(p)}" data-f="${p}" type="${type}" value="${esc(getP(d,p)??"")}" ${extra}>`;
+const fSel=(d,p,opts,rr=false)=>`<select id="${fid(p)}" data-f="${p}" ${rr?"data-rr":""}>${opts.map(o=>{const[v,l]=Array.isArray(o)?o:[o,o];return`<option value="${esc(v)}" ${String(getP(d,p))===String(v)?"selected":""}>${esc(l)}</option>`}).join("")}</select>`;
+const fld=(p,label,inner,hint="",wide=false)=>`<div class="field ${wide?"wide":""}"><label for="${fid(p)}">${label}</label>${inner}${hint?`<span class="sub">${hint}</span>`:""}</div>`;
+const unit=(inner,u)=>`<div class="unit">${inner}<span>${u}</span></div>`;
+
+function secBasics(d){return`<div class="form-grid">
+  ${fld("name","Site name",fIn(d,"name","text",'placeholder="e.g. Sunrise Pune Plant Roof" autocomplete="off"'),"Shown everywhere in the portal and in reports.",true)}
+  ${fld("customer","Customer",fSel(d,"customer",allowedCustomers(),true),me().role==="platform_admin"?"":"You can add sites for customers you already manage.")}
+  ${fld("type","Plant type",fSel(d,"type",TYPES.map(t=>t[0]),true))}
+  ${fld("city","City",fSel(d,"city",CITIES.map(c=>c[0]),true),`${esc(d.state)} · ${d.region} region. Picking a city fills the coordinates.`)}
+  ${fld("commissioned","Commissioning date",fIn(d,"commissioned","date"))}
+  ${fld("address","Address",fIn(d,"address","text",'autocomplete="off"'),"",true)}
+  ${fld("pincode","PIN code",fIn(d,"pincode","text",'inputmode="numeric" maxlength="6"'))}
+  ${fld("tz","Time zone",`<input id="sf-tz" value="Asia/Kolkata (IST, UTC+5:30)" disabled>`)}
+  ${fld("lat","Latitude",fIn(d,"lat","number",'step="0.0001"'),"Decimal degrees north")}
+  ${fld("lng","Longitude",fIn(d,"lng","number",'step="0.0001"'),"Decimal degrees east")}
+  ${fld("contactName","Site contact",fIn(d,"contactName","text",'autocomplete="off"'))}
+  ${fld("contactPhone","Contact phone",fIn(d,"contactPhone","tel",'autocomplete="off"'))}
+</div>`}
+function secPlant(d){const r=+d.cap>0&&+d.acCap>0?(d.cap/d.acCap).toFixed(2):"–";return`<div class="form-grid">
+  ${fld("cap","DC capacity",unit(fIn(d,"cap","number",'min="1" step="0.1"'),"kWp"),"Sum of module nameplate ratings.")}
+  ${fld("acCap","AC capacity",unit(fIn(d,"acCap","number",'min="1" step="0.1"'),"kW"),`DC/AC ratio <b class="num" id="dcac">${r}</b>`)}
+  ${fld("moduleMake","Module make and model",fIn(d,"moduleMake","text",'placeholder="e.g. Waaree Bi-55-550"'))}
+  ${fld("moduleWp","Module rating",unit(fIn(d,"moduleWp","number",'min="100" max="800"'),"Wp"))}
+  ${fld("moduleCount","Number of modules",fIn(d,"moduleCount","number",'min="1"'))}
+  ${fld("mount","Mounting",fSel(d,"mount",MOUNTS))}
+  ${fld("tilt","Tilt",unit(fIn(d,"tilt","number",'min="0" max="60"'),"°"),"0° is flat")}
+  ${fld("azimuth","Azimuth",unit(fIn(d,"azimuth","number",'min="0" max="359"'),"°"),"180° faces due south")}
+</div>`}
+function secData(d){
+  const opts=[["vendor","Inverter maker's cloud","Read data from Huawei, Sungrow, SMA and others through their API."],["modbus","Gateway on site (Modbus)","A Helio gateway polls inverters and meter over RS485 or TCP."],["mqtt","Push over MQTT","Your own datalogger publishes readings to our broker."],["csv","Upload files","Monthly meter readings uploaded by hand. No live data."]];
+  let detail="";
+  if(d.source==="vendor")detail=`<div class="form-grid">${fld("vendor","Inverter cloud",fSel(d,"vendor",VENDORS,true))}${fld("plantCode","Plant ID in that portal",fIn(d,"plantCode","text",'autocomplete="off"'))}
+    ${fld("apiKey","API key",`<input id="sf-apiKey" data-f="apiKey" type="password" autocomplete="new-password" placeholder="${d.apiKey?"Key entered. It is saved with the site":d.apiSaved?"Saved. Type to replace":"Paste the key"}">`,"Stored encrypted. It is never shown again after saving.",true)}</div>`;
+  if(d.source==="modbus")detail=`<div class="form-grid">${fld("gateway","Gateway serial",fIn(d,"gateway","text",'placeholder="GW-123456"'))}${fld("gatewayIp","Gateway local IP",fIn(d,"gatewayIp","text",'placeholder="192.168.1.20"'))}${fld("poll","Reading interval",fSel(d,"poll",[[5,"Every 5 minutes"],[15,"Every 15 minutes"]]))}</div>`;
+  if(d.source==="mqtt")detail=`<div class="form-grid">${fld("topic","Publish to topic",`<input id="sf-topic" class="mono" value="helio/sites/${d.id||"S-NEW"}/telemetry" readonly>`,"",true)}${fld("broker","Broker",`<input id="sf-broker" class="mono" value="mqtts://ingest.helio.example:8883" readonly>`,"Each site gets its own client certificate, issued after saving.",true)}</div>`;
+  if(d.source==="csv")detail=`<p class="hint">Upload a CSV with date, meter reading (kWh) and optional inverter readings each month. Alarms and live power won't be available for this site.</p>`;
+  return`<div class="choice">${opts.map(([v,l,h])=>`<label class="opt ${d.source===v?"on":""}"><input type="radio" name="sf-source" data-f="source" data-rr value="${v}" ${d.source===v?"checked":""}><b>${l}</b><span class="sub">${h}</span></label>`).join("")}</div>
+  ${detail}${d.source!=="csv"?`<div class="filters"><button class="btn" data-sfaction="test">Test connection</button>${d.tested?`<span class="chip s-online">Connected · ${d.inverters.length} inverters found</span>`:`<span class="sub">Checks credentials and lists the devices it can see.</span>`}</div>`:""}`;
+}
+function secDevices(d){
+  const sum=d.inverters.reduce((a,v)=>a+(+v.kw||0),0);
+  return`<div class="panel-head" style="margin:0"><h3>Inverters <span class="muted num" style="font-weight:400">${d.inverters.length} · ${sum} kW of ${d.acCap||"?"} kW AC</span></h3><span class="filters"><button class="btn" data-sfaction="addinv">Add inverter</button><button class="btn" data-sfaction="copyinv" ${d.inverters.length?"":"disabled"}>Duplicate last</button></span></div>
+  <div class="tbl-wrap"><table class="edit"><thead><tr><th>Name</th><th>Make</th><th>Model</th><th class="r">Rated kW</th><th>Serial number</th><th></th></tr></thead><tbody>
+  ${d.inverters.map((v,i)=>`<tr><td><input aria-label="Inverter ${i+1} name" data-inv="${i}|name" value="${esc(v.name)}" size="8"></td><td><input aria-label="Inverter ${i+1} make" data-inv="${i}|make" value="${esc(v.make)}" size="9"></td><td><input aria-label="Inverter ${i+1} model" data-inv="${i}|model" value="${esc(v.model)}" size="14"></td><td class="r"><input aria-label="Inverter ${i+1} rated kW" data-inv="${i}|kw" type="number" value="${esc(v.kw)}" style="width:80px;text-align:right"></td><td><input aria-label="Inverter ${i+1} serial" data-inv="${i}|serial" class="mono" value="${esc(v.serial)}" size="13"></td><td><button class="btn danger" data-sfaction="delinv" data-i="${i}" aria-label="Remove ${esc(v.name)}">Remove</button></td></tr>`).join("")||`<tr><td colspan="6" class="muted" style="padding:18px">No inverters yet. Use <b>Test connection</b> on the previous step to find them, or add them by hand.</td></tr>`}
+  </tbody></table></div>
+  <h3 style="margin-top:8px">Energy meter</h3><div class="form-grid">${fld("meterMake","Meter make and model",fIn(d,"meterMake"))}${fld("meterSerial","Serial number",fIn(d,"meterSerial"))}${fld("ctRatio","CT ratio",fSel(d,"ctRatio",["100/5","200/5","400/5","800/5","1600/5","3200/5"]))}</div>
+  <h3 style="margin-top:8px">Weather station</h3><div class="form-grid"><label class="check-row"><input type="checkbox" data-f="weather" data-rr ${d.weather?"checked":""}> This site has an irradiance sensor</label>${d.weather?fld("weatherMake","Sensor make and model",fIn(d,"weatherMake")):""}</div>`;
+}
+function secTargets(d){const fin=can("view_financials");return`<div class="form-grid">
+  ${fld("targetPR","Target performance ratio",unit(fIn(d,"targetPR","number",'min="50" max="95"'),"%"),"Expected energy is calculated at this PR.")}
+  ${fld("expMethod","How expected energy is worked out",fSel(d,"expMethod",[["pvsyst","PVsyst P50 monthly yield"],["irradiance","From the on-site irradiance sensor"],["flat","Flat daily yield"]]))}
+  ${fld("budgetYield","Budget yield",unit(fIn(d,"budgetYield","number",'step="0.01"'),"kWh/kWp/day"),"Used for budget vs actual in reports.")}
+  ${fin?fld("tariff","Tariff",unit(fIn(d,"tariff","number",'step="0.01"'),"₹/kWh")):""}${fin?fld("billing","Billing model",fSel(d,"billing",["PPA","Net metering","Captive","Open access"])):""}
+</div>${fin?"":`<p class="hint">Tariff and billing are hidden for ${myRole().name}. Existing values are kept.</p>`}
+<h3 style="margin-top:8px">Alarm rules</h3><div class="form-grid">
+  ${fld("offlineMin","Raise "+"<i>Inverter offline</i> after",unit(fIn(d,"offlineMin","number",'min="5"'),"min"),"Only counted in daylight hours.")}
+  ${fld("commsMin","Raise <i>No data</i> after",unit(fIn(d,"commsMin","number",'min="15"'),"min"))}
+  ${fld("prDrop","Raise <i>Underperforming</i> when PR falls",unit(fIn(d,"prDrop","number",'min="1" max="30"'),"points"),"Below the 7-day baseline.")}
+  ${fld("invTemp","Inverter over-temperature at",unit(fIn(d,"invTemp","number"),"°C"))}
+</div>
+<div class="field"><span style="font-weight:600">Who gets alarm emails</span><div class="checks">${UG.map(g=>`<label><input type="checkbox" data-notify="${g.id}" ${d.notify.includes(g.id)?"checked":""}> ${esc(g.name)}</label>`).join("")}</div></div>`}
+function accessPreview(d){
+  const ci=CUSTOMERS.indexOf(d.customer),auto=["SG-C"+ci,"SG-R-"+d.region,...(+d.cap>=1000?["SG-X1"]:[]),...(String(d.commissioned).startsWith("2026")?["SG-X2"]:[])],sgs=new Set([...auto,...d.groups]);
+  const ugs=UG.filter(g=>g.siteGroups.some(x=>sgs.has(x)));const people=USERS.filter(u=>u.role==="platform_admin"||u.groups.some(g=>ugs.some(x=>x.id===g)));
+  return{auto,ugs,people};
+}
+function secAccess(d){const{auto,ugs,people}=accessPreview(d);return`
+  <div class="field"><span style="font-weight:600">Added automatically</span><div>${auto.map(id=>`<span class="tag">${esc(SG.find(g=>g.id===id).name)}</span>`).join("")}</div><span class="sub">Customer, region and rule-based groups (size, commissioning year) follow the site's details.</span></div>
+  <div class="field"><span style="font-weight:600">Custom site groups</span><div class="checks">${SG.filter(g=>g.kind==="Custom"&&!["SG-X1","SG-X2"].includes(g.id)).map(g=>`<label><input type="checkbox" data-sgroup="${g.id}" ${d.groups.includes(g.id)?"checked":""}> ${esc(g.name)} <span class="sub">(${g.sites.length} sites)</span></label>`).join("")}</div></div>
+  <div class="hint"><b>${people.length} people</b> will be able to see this site through ${ugs.length} user groups${ugs.length?": "+ugs.slice(0,5).map(g=>esc(g.name)).join(", ")+(ugs.length>5?" and more":""):""}, plus Platform Admins. What each person can do still depends on their role.</div>`}
+function secReview(d){
+  const iss=allIssues(d);const errs=iss.flatMap(x=>x.e.map(m=>[x,m])),warns=iss.flatMap(x=>x.w.map(m=>[x,m]));
+  const row=(k,v)=>`<dt>${k}</dt><dd>${v||'<span class="muted">Not set</span>'}</dd>`;const src={vendor:`${esc(d.vendor)} · plant ${esc(d.plantCode)}`,modbus:`Gateway ${esc(d.gateway)} · every ${d.poll} min`,mqtt:"MQTT push",csv:"File upload"}[d.source];
+  const blk=(k,title,body)=>`<section class="rev"><div class="panel-head" style="margin-bottom:6px"><h3>${title}</h3><button class="btn" data-step="${k}">Change</button></div><dl class="kv">${body}</dl></section>`;
+  return`${errs.length?`<div class="notice bad"><b>Fix before saving</b><ul>${errs.map(([x,m])=>`<li>${x.l}: ${m}</li>`).join("")}</ul></div>`:""}${warns.length?`<div class="notice warn"><b>Check these</b><ul>${warns.map(([x,m])=>`<li>${x.l}: ${m}</li>`).join("")}</ul></div>`:""}
+  <div class="rev-grid">${blk("basics","Basics",row("Name",esc(d.name))+row("Customer",esc(d.customer))+row("Type",d.type)+row("Location",`${esc(d.city)}, ${esc(d.state)} · ${(+d.lat).toFixed(3)}°N ${(+d.lng).toFixed(3)}°E`)+row("Commissioned",d.commissioned))}
+  ${blk("plant","Plant",row("Capacity",d.cap?`${d.cap} kWp DC / ${d.acCap||"?"} kW AC`:"")+row("Modules",d.moduleCount?`${d.moduleCount} × ${d.moduleWp} Wp ${esc(d.moduleMake)}`:"")+row("Mounting",`${d.mount}, ${d.tilt}° tilt, ${d.azimuth}° azimuth`))}
+  ${blk("data","Data connection",row("Source",src)+row("Status",d.source==="csv"?"No live data":d.tested?"Connection tested":"Not tested"))}
+  ${blk("devices","Devices",row("Inverters",d.inverters.length?`${d.inverters.length} · ${d.inverters.reduce((a,v)=>a+(+v.kw||0),0)} kW`:"")+row("Meter",esc(d.meterMake))+row("Irradiance sensor",d.weather?esc(d.weatherMake)||"Yes":"No"))}
+  ${blk("targets","Targets and alarms",row("Target PR",d.targetPR+"%")+(can("view_financials")?row("Tariff",`₹${d.tariff}/kWh · ${d.billing}`):"")+row("Alarm emails",d.notify.map(id=>esc(UG.find(g=>g.id===id).name)).join(", ")))}
+  ${blk("access","Access",row("Site groups",[...accessPreview(d).auto,...d.groups].map(id=>esc(SG.find(g=>g.id===id).name)).join(", "))+row("People who can see it",String(accessPreview(d).people.length)))}</div>`;
+}
+const SECTION={basics:secBasics,plant:secPlant,data:secData,devices:secDevices,targets:secTargets,access:secAccess,review:secReview};
+
+function vSiteForm(){
+  if(!can("edit_sites"))return pageHead("Site settings")+locked("Adding and editing sites");
+  const d=state.draft;if(!d)return pageHead("Site settings")+`<p class="muted">Nothing to edit.</p>`;
+  const step=state.step,i=STEPS.findIndex(s=>s[0]===step),{e,w}=step==="review"?{e:[],w:[]}:checkStep(d,step);
+  const shown=state.showErr?e:[];
+  if(d.isNew){
+    const done=k=>STEPS.findIndex(s=>s[0]===k)<i&&!checkStep(d,k).e.length;
+    return`<button class="back" data-nav="sites">← All sites</button>`+pageHead("Add a site","Takes about five minutes. You can change everything later in the site's settings.")+
+    `<ol class="stepper">${STEPS.map(([k,l],j)=>`<li><button data-step="${k}" ${k===step?'aria-current="step"':""} class="${done(k)?"done":""}"><span class="dot">${done(k)?"✓":j+1}</span>${l}</button></li>`).join("")}</ol>
+    <section class="panel form">${shown.length?`<div class="notice bad"><ul>${shown.map(m=>`<li>${m}</li>`).join("")}</ul></div>`:""}${SECTION[step](d)}${w.length&&step!=="review"?`<div class="notice warn"><ul>${w.map(m=>`<li>${m}</li>`).join("")}</ul></div>`:""}
+    <div class="form-foot"><button class="btn" data-sfaction="${i?"prev":"cancel"}">${i?"Back":"Cancel"}</button>${step==="review"?`<button class="btn accent" data-sfaction="create" ${allIssues(d).some(x=>x.e.length)?"disabled":""}>Create site</button>`:`<button class="btn primary" data-sfaction="next">Continue to ${STEPS[i+1][1].toLowerCase()}</button>`}</div></section>`;
+  }
+  const s=siteById(d.id),tabs=[...STEPS.slice(0,-1),["danger","Archive"]];
+  const body=step==="danger"?`<h3>Archive this site</h3><p class="muted" style="max-width:60ch">Archiving stops data collection and alarms, removes the site from dashboards and reports, and keeps its history. A Platform Admin can restore it later.</p>
+    <div class="field" style="max-width:360px"><label for="sf-confirm">Type the site ID <b class="mono">${d.id}</b> to confirm</label><input id="sf-confirm" autocomplete="off"></div><div><button class="btn danger" data-sfaction="archive">Archive site</button></div>`:SECTION[step](d);
+  return`<button class="back" data-site="${d.id}">← ${esc(s.name)}</button>`+pageHead("Site settings",`${d.id} · ${esc(s.name)}`,`<button class="btn" data-site="${d.id}">Discard changes</button><button class="btn primary" data-sfaction="save">Save changes</button>`)+
+  `<div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" data-step="${k}" aria-selected="${k===step}" ${k==="danger"?'style="color:var(--bad)"':""}>${l}${k!=="danger"&&checkStep(d,k).e.length?' <span class="chip sev-critical plain" style="padding:0 6px">!</span>':""}</button>`).join("")}</div>
+  <section class="panel form">${step!=="danger"&&e.length?`<div class="notice bad"><ul>${e.map(m=>`<li>${m}</li>`).join("")}</ul></div>`:""}${body}${w.length&&step!=="danger"?`<div class="notice warn"><ul>${w.map(m=>`<li>${m}</li>`).join("")}</ul></div>`:""}</section>`;
+}
+
+function applyDraftToSite(d,s){
+  const before={customer:s.customer,region:s.region};
+  Object.assign(s,{name:d.name.trim(),customer:d.customer,type:d.type,city:d.city,state:d.state,region:d.region,lat:+d.lat,lng:+d.lng,cap:+d.cap,commissioned:new Date(d.commissioned),inv:Math.max(1,d.inverters.length)});
+  if(can("view_financials"))s.tariff=+d.tariff;
+  const{id,isNew,name,customer,type,city,state:st,region,lat,lng,commissioned,cap,tariff,groups,apiKey,tested,...cfg}=d;
+  if(apiKey)cfg.apiSaved=true;s.cfg=cfg;
+  SG.forEach(g=>{const want=g.kind==="Customer"?g.name===s.customer:g.kind==="Region"?g.id==="SG-R-"+s.region:g.id==="SG-X1"?s.cap>=1000:g.id==="SG-X2"?s.commissioned.getFullYear()===2026:groups.includes(g.id);
+    const has=g.sites.includes(s.id);if(want&&!has)g.sites.push(s.id);if(!want&&has)g.sites.splice(g.sites.indexOf(s.id),1)});
+  scopeCache=null;return before;
+}
+function createSite(d){
+  const s={id:"S-"+String(1001+SITES.length),idx:SITES.length,status:"comms",pr:d.targetPR/100,daily:DAYS.map(()=>({exp:0,e:null,gap:true})),todayExp:0,todayE:null,nowKW:0,lastSeen:"Awaiting first data",isNew:true,tariff:+d.tariff||5.5};
+  SITES.push(s);applyDraftToSite(d,s);
+  const exp=s.cap*RY[s.region];s.daily.forEach((x,k)=>x.exp=k>=29?exp*WF[s.region][k]:0);
+  return s;
+}
+function startNewSite(){state.draft=draftFrom(null);state.step="basics";state.showErr=false;go("siteForm")}
+function startEditSite(id,step="basics"){state.draft=draftFrom(siteById(id));state.step=step;state.showErr=false;go("siteForm")}
+function bulkDrawer(){
+  openDrawer(dHead("Import sites from CSV","Paste one site per line. Data connections and devices are set up afterwards for each site.")+
+  `<div class="field"><label for="bulkcsv">Columns: name, customer, city, type, DC kWp, AC kW</label><textarea id="bulkcsv" rows="9" class="mono" style="font-size:.8rem">Sunrise Surat Dyeing Unit Roof, Sunrise Textiles, Surat, Rooftop, 820, 700
+Kaveri Nagpur Cold Store Roof, Kaveri Cold Chain, Nagpur, Rooftop, 410, 350
+Apex Bhiwandi Hub Carport, Apex Warehousing, Mumbai, Carport, 240, 200</textarea><span class="sub">Customers and cities must match ones already in the portal. Up to 500 rows at a time.</span></div>
+  <div id="bulkcheck"></div><div class="filters"><button class="btn" data-sfaction="bulkcheck">Check rows</button><button class="btn primary" data-sfaction="bulkimport">Import</button></div>`);
+}
+function parseBulk(){
+  const lines=document.getElementById("bulkcsv").value.split("\n").map(l=>l.trim()).filter(Boolean);
+  return lines.map((l,n)=>{const[name,customer,city,type,cap,ac]=l.split(",").map(x=>(x||"").trim());const c=CITIES.find(x=>x[0].toLowerCase()===(city||"").toLowerCase());const errs=[];
+    if(!name)errs.push("no name");if(!allowedCustomers().includes(customer))errs.push(`unknown customer "${customer}"`);if(!c)errs.push(`unknown city "${city}"`);if(!TYPES.some(t=>t[0]===type))errs.push(`type must be Rooftop, Ground-mount, Carport or Floating`);if(!(+cap>0))errs.push("DC kWp missing");
+    if(SITES.some(s=>s.name.toLowerCase()===(name||"").toLowerCase()))errs.push("name already used");return{n:n+1,name,customer,c,type,cap:+cap,ac:+ac||Math.round(cap*.85),errs}});
+}
+
 /* ---------- Render + events ---------- */
 let toastT;function toast(m){clearTimeout(toastT);let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";t.setAttribute("role","status");document.body.appendChild(t)}t.textContent=m;toastT=setTimeout(()=>t.remove(),2600)}
 function log(action,target){AUDIT.push({when:new Date(TODAY.getTime()+NOW_H*3600e3+AUDIT.length*1000),actor:me().name,action,target,ip:"49.36.88.10"})}
-const VIEWS={overview:vOverview,sites:vSites,site:vSite,reports:vReports,alarms:vAlarms,users:vUsers,groups:vGroups,roles:vRoles,audit:vAudit};
+const VIEWS={siteForm:vSiteForm,overview:vOverview,sites:vSites,site:vSite,reports:vReports,alarms:vAlarms,users:vUsers,groups:vGroups,roles:vRoles,audit:vAudit};
 function render(){
   const root=document.getElementById("root");
   if(!state.loggedIn){root.innerHTML=vLogin();drawSky();return}
   root.innerHTML=shell(VIEWS[state.view]());
+  const cur=document.querySelector(".stepper [aria-current]");if(cur)cur.scrollIntoView({block:"nearest",inline:"center"});
 }
 function go(view,extra={}){Object.assign(state,{view},extra);closeDrawer();render();window.scrollTo(0,0)}
 function drawSky(){const c=document.getElementById("sky");if(!c)return;const r=c.getBoundingClientRect(),dpr=devicePixelRatio||1;c.width=r.width*dpr;c.height=r.height*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);
@@ -696,7 +923,6 @@ document.addEventListener("click",e=>{
   if(a==="invite")return inviteDrawer();
   if(a==="schedule")return scheduleDrawer();
   if(a==="request"){e.preventDefault();toast("The request form would open here");return}
-  if(a==="editsite"){toast("Site editing opens a form here (not built in the prototype)");return}
   if(a==="newrole"){toast("New role form would open here");return}
   if(a==="copycsv"){const{rows}=reportRows();const csv=["Group,Sites,Capacity kWp,Energy kWh,Expected kWh,PR"+(can("view_financials")?",Revenue INR":""),...rows.map(x=>[`"${x.k}"`,x.n,x.cap,Math.round(x.e),Math.round(x.x),(x.pr*100).toFixed(1)+(can("view_financials")?","+Math.round(x.rev):"")].join(","))].join("\n");
     navigator.clipboard.writeText(csv).then(()=>toast(`Copied ${rows.length} rows`)).catch(()=>toast("Clipboard is blocked here"));log("Exported report",`${rows.length} rows`);return}
@@ -731,5 +957,52 @@ document.addEventListener("submit",e=>{
     closeDrawer();toast(rq?"Approved. Invite sent":"Invite sent");state.userTab="people";render()}
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer();if(e.key==="Enter"&&e.target.matches("tr.click"))e.target.click()});
+
+function sfRender(focusId){const pos=document.activeElement&&document.activeElement.id;render();const el=document.getElementById(focusId||pos);if(el)el.focus()}
+function genInverters(d){const ac=+d.acCap||Math.round((+d.cap||100)*.85);const models=INV_MODELS[d.vendor]||INV_MODELS[VENDORS[0]];const sizes=[50,100,215];
+  const k=ac>=2000?2:ac>=300?1:0;const n=Math.max(1,Math.round(ac/sizes[k]));const kw=Math.round(ac/n);const pre=(d.vendor||"XX").slice(0,2).toUpperCase();
+  return[...Array(n)].map((_,i)=>({name:"INV-"+String(i+1).padStart(2,"0"),make:(d.vendor||"").split(" ")[0],model:models[k],kw,serial:pre+String(1e9+Math.floor(Math.random()*9e9)).slice(0,10)}))}
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-sfaction],[data-step]");if(!t)return;const d=state.draft;
+  if(t.dataset.step){state.step=t.dataset.step;state.showErr=false;render();window.scrollTo(0,0);return}
+  const a=t.dataset.sfaction;
+  if(a==="new")return startNewSite();
+  if(a==="bulk")return bulkDrawer();
+  if(a==="edit")return startEditSite(state.siteId);
+  if(a==="cancel")return go("sites");
+  if(a==="prev"){state.step=STEPS[STEPS.findIndex(s=>s[0]===state.step)-1][0];state.showErr=false;render();window.scrollTo(0,0);return}
+  if(a==="next"){if(checkStep(d,state.step).e.length){state.showErr=true;render();return}state.step=STEPS[STEPS.findIndex(s=>s[0]===state.step)+1][0];state.showErr=false;render();window.scrollTo(0,0);return}
+  if(a==="test"){
+    if(d.source==="vendor"&&(!d.plantCode.trim()||(!d.apiSaved&&!d.apiKey))){state.showErr=true;toast("Enter the plant ID and API key first");render();return}
+    if(d.source==="modbus"&&!d.gateway.trim()){state.showErr=true;toast("Enter the gateway serial first");render();return}
+    if(!d.inverters.length)d.inverters=genInverters(d);d.tested=true;toast(`Connected. Found ${d.inverters.length} inverters, last reading 2 min ago`);render();return}
+  if(a==="addinv"){const last=d.inverters[d.inverters.length-1];d.inverters.push({name:"INV-"+String(d.inverters.length+1).padStart(2,"0"),make:last?last.make:"",model:last?last.model:"",kw:last?last.kw:"",serial:""});render();return}
+  if(a==="copyinv"){const last=d.inverters[d.inverters.length-1];d.inverters.push({...last,name:"INV-"+String(d.inverters.length+1).padStart(2,"0"),serial:""});render();return}
+  if(a==="delinv"){d.inverters.splice(+t.dataset.i,1);render();return}
+  if(a==="create"){if(allIssues(d).some(x=>x.e.length))return;const s=createSite(d);log("Added site",`${s.id} ${s.name} (${fmtCap(s.cap)}, ${s.customer})`);state.draft=null;toast(`${s.name} added`);return go("site",{siteId:s.id})}
+  if(a==="save"){const bad=allIssues(d).filter(x=>x.e.length);if(bad.length){state.step=bad[0].k;render();toast("Fix the items marked ! first");return}
+    const s=siteById(d.id),old={name:s.name,cap:s.cap,tariff:s.tariff,customer:s.customer};applyDraftToSite(d,s);
+    const ch=[];if(old.name!==s.name)ch.push(`name → ${s.name}`);if(old.cap!==s.cap)ch.push(`capacity ${old.cap} → ${s.cap} kWp`);if(old.tariff!==s.tariff)ch.push(`tariff ₹${old.tariff} → ₹${s.tariff}`);if(old.customer!==s.customer)ch.push(`customer → ${s.customer}`);
+    log("Edited site",`${s.id} ${ch.join(", ")||"settings updated"}`);state.draft=null;toast("Site settings saved");return go("site",{siteId:s.id})}
+  if(a==="archive"){const v=(document.getElementById("sf-confirm").value||"").trim();if(v!==d.id){toast(`Type ${d.id} to confirm`);return}
+    const s=siteById(d.id);s.archived=true;scopeCache=null;log("Archived site",`${s.id} ${s.name}`);state.draft=null;toast(`${s.name} archived`);return go("sites")}
+  if(a==="bulkcheck"||a==="bulkimport"){const rows=parseBulk(),bad=rows.filter(r=>r.errs.length);
+    document.getElementById("bulkcheck").innerHTML=`<div class="notice ${bad.length?"bad":"warn"}" style="${bad.length?"":"background:var(--ok-soft);border-color:var(--ok)"}">${bad.length?`<b>${bad.length} of ${rows.length} rows need fixing</b><ul>${bad.map(r=>`<li>Row ${r.n}: ${esc(r.errs.join(", "))}</li>`).join("")}</ul>`:`<b>All ${rows.length} rows look good.</b>`}</div>`;
+    if(a==="bulkimport"&&!bad.length&&rows.length){rows.forEach(r=>{const dd=draftFrom(null);Object.assign(dd,{name:r.name,customer:r.customer,type:r.type,city:r.c[0],state:r.c[1],region:r.c[2],lat:r.c[3],lng:r.c[4],cap:r.cap,acCap:r.ac});createSite(dd)});
+      log("Imported sites",`${rows.length} sites from CSV`);closeDrawer();toast(`${rows.length} sites imported. Set up their data connections next`);state.sitesQ="";state.sort="name";render()}
+    return}
+});
+function sfInput(e){
+  const t=e.target,d=state.draft;if(!d)return;
+  if(t.dataset.inv){const[i,f]=t.dataset.inv.split("|");d.inverters[+i][f]=f==="kw"?(t.value===""?"":+t.value):t.value;return}
+  if(t.dataset.notify){d.notify=t.checked?[...d.notify,t.dataset.notify]:d.notify.filter(x=>x!==t.dataset.notify);return}
+  if(t.dataset.sgroup){d.groups=t.checked?[...d.groups,t.dataset.sgroup]:d.groups.filter(x=>x!==t.dataset.sgroup);if(e.type==="change")sfRender();return}
+  const p=t.dataset.f;if(!p)return;
+  let v=t.type==="checkbox"?t.checked:t.type==="number"?(t.value===""?"":+t.value):t.value;setP(d,p,v);
+  if(["plantCode","apiKey","gateway","vendor","source"].includes(p))d.tested=false;
+  if(p==="cap"||p==="acCap"){const el=document.getElementById("dcac");if(el)el.textContent=+d.cap>0&&+d.acCap>0?(d.cap/d.acCap).toFixed(2):"–"}
+  if(e.type==="change"&&t.hasAttribute("data-rr")){if(p==="city"){const c=CITIES.find(x=>x[0]===v);Object.assign(d,{state:c[1],region:c[2],lat:c[3],lng:c[4]})}sfRender(t.type==="radio"?null:t.id)}
+}
+document.addEventListener("input",sfInput);document.addEventListener("change",sfInput);
 render();
 </script>

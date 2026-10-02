@@ -5,6 +5,7 @@ A multi-site solar monitoring and reporting portal with users, groups, role-base
 ## What's here
 
 - `prototype/index.html`: a single-file clickable prototype on sample data (360 sites, 64 users, 6 roles). Open it in a browser; no build step. Use "Viewing as" at the top to switch between demo people and see how access changes by role.
+- Sites can be added with a step-by-step wizard (Sites → Add site), imported from CSV, and configured or archived from Site settings.
 - `docs/plan.md`: the plan for the production build: access model, roles, user registry, screens, reporting metrics, suggested stack and open questions.
 
 ## Access model in one line

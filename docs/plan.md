@@ -44,6 +44,8 @@ Roles are editable (custom roles allowed); Platform Admin is fixed.
 
 ## 3. Screens
 
+Site setup (Platform Admin and Portfolio Manager, via "Edit site settings"): Add site wizard in seven steps (basics, plant, data connection, devices, targets and alarms, access, review) with validation such as DC/AC ratio and module count vs kWp; "Test connection" pulls the inverter list from the data source; CSV import for many sites at once; Site settings with the same sections as tabs plus Archive (keeps history, stops collection).
+
 Monitor: Overview (portfolio KPIs, daily generation vs expected, status breakdown, worst/best PR, site map) · Sites (search, filter by status/region/type/group, sort, paging for hundreds of sites) · Site detail (live power curve vs expected, 30-day energy, inverters, alarms, details, who has access) · Reports (scope by site group, 7/14/30 days or custom range, group by customer/region/type/site, CSV/PDF export, scheduled emails) · Alarms (open/acknowledged/cleared, acknowledge).
 
 Administration: Users (people + registration requests) · Groups and access (user groups, site groups) · Roles (permission matrix) · Audit log.
