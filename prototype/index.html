@@ -1,0 +1,735 @@
+<title>Helio Solar Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: operations console. Fixed ink sidebar, sun-amber accent for energy, status colours carry state. */
+:root{
+  --bg:#F3F6F7; --surface:#FFFFFF; --surface-2:#EAF0F2; --ink:#12222A; --muted:#5A6B74; --line:#D9E2E6;
+  --side:#0F2A33; --side-ink:#C9D9DE; --side-hi:#FFFFFF; --side-line:#1E3D48;
+  --accent:#E9A100; --accent-soft:#FCEFC9; --accent-ink:#7A5200; --brand:#0E6A7A; --brand-soft:#D7EDF0;
+  --ok:#17905F; --ok-soft:#DDF3E8; --warn:#C27A00; --warn-soft:#FBEBCB; --bad:#C93C3C; --bad-soft:#F8DEDE; --off:#7D8E97; --off-soft:#E6ECEF;
+  --shadow:0 1px 2px rgba(18,34,42,.06),0 4px 16px rgba(18,34,42,.05);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1418; --surface:#111E24; --surface-2:#172830; --ink:#E4EDF0; --muted:#93A6AF; --line:#22363F;
+  --side:#08181E; --side-ink:#A9BEC5; --side-hi:#FFFFFF; --side-line:#173039;
+  --accent:#F4B323; --accent-soft:#3A2E10; --accent-ink:#F7CD6A; --brand:#4FB7C6; --brand-soft:#123843;
+  --ok:#3CC08A; --ok-soft:#123528; --warn:#E9A23B; --warn-soft:#3A2B10; --bad:#EE6B6B; --bad-soft:#3D1A1C; --off:#8FA1AA; --off-soft:#1D2D35;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1418; --surface:#111E24; --surface-2:#172830; --ink:#E4EDF0; --muted:#93A6AF; --line:#22363F;
+  --side:#08181E; --side-ink:#A9BEC5; --side-hi:#FFFFFF; --side-line:#173039;
+  --accent:#F4B323; --accent-soft:#3A2E10; --accent-ink:#F7CD6A; --brand:#4FB7C6; --brand-soft:#123843;
+  --ok:#3CC08A; --ok-soft:#123528; --warn:#E9A23B; --warn-soft:#3A2B10; --bad:#EE6B6B; --bad-soft:#3D1A1C; --off:#8FA1AA; --off-soft:#1D2D35;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+  color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:1.6rem} h2{font-size:1.15rem} h3{font-size:1rem}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100%}
+.side{background:var(--side);color:var(--side-ink);padding:18px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh;overflow:auto}
+.logo{display:flex;align-items:center;gap:10px;color:var(--side-hi);font-family:var(--f-display);font-weight:700;font-size:1.1rem;padding:0 6px}
+.logo svg{flex:none}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:var(--side-ink);font-weight:500}
+.nav button:hover{background:var(--side-line);color:var(--side-hi)}
+.nav button[aria-current="page"]{background:var(--side-line);color:var(--side-hi);box-shadow:inset 3px 0 0 var(--accent)}
+.nav button:focus-visible{outline:2px solid var(--accent)}
+.nav .count{margin-left:auto;font-family:var(--f-mono);font-size:.75rem;background:var(--bad);color:#fff;border-radius:10px;padding:0 7px}
+.nav-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;padding:10px 10px 4px;opacity:.6}
+.me-card{margin-top:auto;border:1px solid var(--side-line);border-radius:10px;padding:12px;font-size:.82rem;display:grid;gap:4px}
+.me-card b{color:var(--side-hi)}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;padding:10px 24px;flex-wrap:wrap}
+.search{flex:1 1 220px;position:relative;min-width:0}
+.search input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search-results{position:absolute;top:110%;left:0;right:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);max-height:300px;overflow:auto;z-index:20}
+.search-results button{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:8px;width:100%;box-sizing:border-box;padding:8px 12px}
+.search-results button:hover,.search-results button:focus-visible{background:var(--surface-2)}
+.persona{display:flex;align-items:center;gap:8px;font-size:.82rem}
+.persona select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);max-width:260px}
+.content{padding:22px 24px 48px;display:grid;gap:18px;min-width:0}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.page-head p{margin:4px 0 0}
+.proto-note{font-size:.78rem;color:var(--accent-ink);background:var(--accent-soft);padding:4px 10px;border-radius:20px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.grid{display:grid;gap:16px}
+.g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g-3-1{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.kpi{background:var(--surface);padding:14px 16px;display:grid;gap:2px;min-width:0}
+.kpi .v{font-family:var(--f-display);font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi .v small{font-family:var(--f-body);font-size:.8rem;font-weight:500;color:var(--muted);margin-left:3px}
+.kpi .d{font-size:.78rem;color:var(--muted)}
+.up{color:var(--ok)} .down{color:var(--bad)}
+
+.tbl-wrap{overflow-x:auto;margin:0 -16px;padding:0 16px}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.sortable{cursor:pointer} th.sortable:hover{color:var(--ink)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td.r,th.r{text-align:right}
+tr.click{cursor:pointer} tr.click:hover td{background:var(--surface-2)}
+.site-name{font-weight:600} .sub{font-size:.76rem;color:var(--muted)}
+
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:600;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.chip.plain::before{display:none}
+.s-online{color:var(--ok);background:var(--ok-soft)} .s-degraded{color:var(--warn);background:var(--warn-soft)}
+.s-offline{color:var(--bad);background:var(--bad-soft)} .s-comms{color:var(--off);background:var(--off-soft)}
+.sev-critical{color:var(--bad);background:var(--bad-soft)} .sev-major{color:var(--warn);background:var(--warn-soft)} .sev-minor{color:var(--off);background:var(--off-soft)}
+.role{color:var(--brand);background:var(--brand-soft)}
+.tag{display:inline-block;font-size:.74rem;padding:1px 8px;border-radius:6px;background:var(--surface-2);color:var(--muted);margin:1px 2px 1px 0}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:500;font-size:.86rem}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary:hover{opacity:.9}
+.btn.accent{background:var(--accent);color:#2A1B00;border-color:var(--accent)}
+.btn.danger{color:var(--bad)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input,.field input,.field select,.field textarea{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:6px 12px;font-size:.84rem;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.seg button:focus-visible{outline:2px solid var(--accent)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs button{all:unset;cursor:pointer;padding:8px 12px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.tabs button:focus-visible{outline:2px solid var(--accent)}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;font-size:.84rem}
+
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--f-mono);font-size:10px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+.status-bars{display:grid;gap:10px}
+.sb-row{display:grid;grid-template-columns:110px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:.84rem}
+.sb-track{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.sb-fill{height:100%;border-radius:5px}
+
+.locked{display:grid;place-items:center;text-align:center;padding:48px 16px;gap:8px;color:var(--muted)}
+.locked svg{color:var(--off)}
+.hint{font-size:.8rem;color:var(--muted);background:var(--surface-2);border-radius:8px;padding:10px 12px}
+
+.drawer-bg{position:fixed;inset:0;background:rgba(8,18,22,.35);z-index:30}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--surface);z-index:31;overflow:auto;padding:20px;padding-top:calc(20px + env(safe-area-inset-top,0px));display:grid;gap:16px;align-content:start;box-shadow:-8px 0 30px rgba(0,0,0,.15)}
+.field{display:grid;gap:5px;font-size:.84rem}
+.field label{font-weight:600}
+.checks{display:grid;gap:6px;max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.checks label{display:flex;gap:8px;align-items:center;font-weight:400}
+.perm-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;font-size:.82rem}
+.perm-list span{display:flex;gap:6px;align-items:center}
+.yes{color:var(--ok)} .no{color:var(--off)}
+.matrix td.c,.matrix th.c{text-align:center}
+.matrix input{width:16px;height:16px;accent-color:var(--brand)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;cursor:pointer;text-align:left}
+.card:hover{border-color:var(--brand)}
+.card .meta{display:flex;gap:14px;font-size:.8rem;color:var(--muted)}
+.card .meta b{color:var(--ink);font-family:var(--f-mono)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.86rem}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.mobile-only{display:none}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:50;font-size:.86rem;box-shadow:var(--shadow)}
+.back{all:unset;cursor:pointer;color:var(--muted);font-size:.84rem}
+.back:hover{color:var(--ink)}
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.inv{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:3px;font-size:.8rem}
+.inv b{font-family:var(--f-mono);font-size:.95rem}
+.inv.bad{border-color:var(--bad);background:var(--bad-soft)}
+.inv.warn{border-color:var(--warn);background:var(--warn-soft)}
+
+.login{min-height:100%;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:var(--bg)}
+.login-art{background:var(--side);color:var(--side-ink);padding:48px;display:flex;flex-direction:column;justify-content:space-between;gap:24px;position:relative;overflow:hidden}
+.login-art h1{color:var(--side-hi);font-size:2.4rem;max-width:14ch;line-height:1.05}
+.login-art canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.login-art > *{position:relative}
+.login-form{padding:48px 32px;display:grid;align-content:center;gap:16px;max-width:460px;width:100%;justify-self:center}
+.personas{display:grid;gap:8px}
+.personas button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;gap:8px;background:var(--surface)}
+.personas button:hover,.personas button:focus-visible{border-color:var(--brand)}
+
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.g-3-1{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;height:auto;padding:12px 16px;gap:10px}
+  .nav{flex-direction:row;overflow-x:auto;gap:4px}
+  .nav button{white-space:nowrap;padding:7px 10px}
+  .nav-label,.me-card{display:none}
+  .mobile-only{display:inline-flex}
+  .top{padding:10px 16px}
+  .content{padding:16px 16px 40px}
+  .g-2{grid-template-columns:minmax(0,1fr)}
+  .login{grid-template-columns:minmax(0,1fr)}
+  .login-art{padding:28px 20px}
+  .login-art h1{font-size:1.8rem}
+  .login-form{padding:24px 16px}
+}
+@media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.perm-list{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div id="root"></div>
+<div id="layer"></div>
+
+<script>
+/* ---------- Seeded sample data ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let R=mulberry32(20261002);
+const rnd=(a,b)=>a+R()*(b-a), pick=a=>a[Math.floor(R()*a.length)], clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const TODAY=new Date(2026,9,2), NOW_H=14.5;
+const DAYS=[...Array(30)].map((_,i)=>{const d=new Date(TODAY);d.setDate(d.getDate()-30+i);return d});
+const dlabel=d=>d.toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+
+const CITIES=[["Pune","Maharashtra","West",18.52,73.86],["Mumbai","Maharashtra","West",19.08,72.88],["Nagpur","Maharashtra","Central",21.15,79.09],["Nashik","Maharashtra","West",20.0,73.79],["Ahmedabad","Gujarat","West",23.02,72.57],["Surat","Gujarat","West",21.17,72.83],["Rajkot","Gujarat","West",22.3,70.8],["Vadodara","Gujarat","West",22.31,73.18],["Jaipur","Rajasthan","North",26.91,75.79],["Jodhpur","Rajasthan","North",26.24,73.02],["Bikaner","Rajasthan","North",28.02,73.31],["Udaipur","Rajasthan","North",24.58,73.71],["Delhi","Delhi","North",28.61,77.21],["Gurugram","Haryana","North",28.46,77.03],["Noida","Uttar Pradesh","North",28.54,77.39],["Lucknow","Uttar Pradesh","North",26.85,80.95],["Kanpur","Uttar Pradesh","North",26.45,80.33],["Chandigarh","Punjab","North",30.73,76.78],["Ludhiana","Punjab","North",30.9,75.85],["Bengaluru","Karnataka","South",12.97,77.59],["Mysuru","Karnataka","South",12.3,76.64],["Hubballi","Karnataka","South",15.36,75.12],["Chennai","Tamil Nadu","South",13.08,80.27],["Coimbatore","Tamil Nadu","South",11.02,76.96],["Madurai","Tamil Nadu","South",9.93,78.12],["Tirunelveli","Tamil Nadu","South",8.71,77.76],["Hyderabad","Telangana","South",17.39,78.49],["Warangal","Telangana","South",17.97,79.6],["Vijayawada","Andhra Pradesh","South",16.51,80.65],["Anantapur","Andhra Pradesh","South",14.68,77.6],["Kochi","Kerala","South",9.93,76.27],["Bhopal","Madhya Pradesh","Central",23.26,77.41],["Indore","Madhya Pradesh","Central",22.72,75.86],["Rewa","Madhya Pradesh","Central",24.53,81.3],["Raipur","Chhattisgarh","Central",21.25,81.63],["Kolkata","West Bengal","East",22.57,88.36],["Bhubaneswar","Odisha","East",20.3,85.82],["Patna","Bihar","East",25.59,85.14],["Ranchi","Jharkhand","East",23.34,85.31],["Guwahati","Assam","East",26.14,91.74]];
+const REGIONS=["North","West","Central","South","East"];
+const RY={North:4.9,West:5.1,Central:5.0,South:4.7,East:4.3};
+const CUSTOMERS=["Sunrise Textiles","Kaveri Cold Chain","Apex Warehousing","Nirmal Schools Trust","Greenfield Hospitals","Meridian Auto Parts","Indus Retail Malls","Deccan Agro Foods"];
+const TYPES=[["Rooftop",.55,25,1000],["Ground-mount",.25,1000,15000],["Carport",.12,50,500],["Floating",.08,500,5000]];
+const SUFFIX={"Rooftop":["Plant Roof","Warehouse Roof","Block A Roof","Campus Roof","Factory Roof"],"Ground-mount":["Solar Park","Ground Array","Farm"],"Carport":["Carport","Parking Canopy"],"Floating":["Reservoir Float","Lake Float"]};
+const WF={};REGIONS.forEach(r=>{WF[r]=DAYS.map(()=>clamp(0.62+R()*0.46,0.55,1.05));WF[r].today=clamp(0.75+R()*0.3,0.6,1.03)});
+
+const SITES=[];
+for(let i=0;i<360;i++){
+  const c=pick(CITIES);let x=R(),acc=0,T=TYPES[0];for(const t of TYPES){acc+=t[1];if(x<=acc){T=t;break}}
+  const cap=Math.round(T[2]+Math.pow(R(),2.2)*(T[3]-T[2]));
+  const sx=R();const status=sx<.82?"online":sx<.91?"degraded":sx<.95?"offline":"comms";
+  const pr=status==="degraded"?rnd(.56,.69):rnd(.73,.84);
+  const customer=CUSTOMERS[Math.floor(Math.pow(R(),1.3)*CUSTOMERS.length)];
+  const offDays=status==="offline"?1+Math.floor(R()*4):0, gapDays=status==="comms"?1+Math.floor(R()*2):0;
+  const daily=DAYS.map((d,k)=>{const exp=cap*RY[c[2]]*WF[c[2]][k]*rnd(.96,1.04);let av=status==="degraded"?rnd(.86,.97):rnd(.985,1);
+    if(k>=30-offDays)av=0; const gap=k>=30-gapDays; return{exp,e:gap?null:exp*(pr/.8)*av*rnd(.97,1.03),gap}});
+  const todayExp=cap*RY[c[2]]*WF[c[2]].today, frac=(1-Math.cos(Math.PI*(NOW_H-6)/12.5))/2;
+  const live=!(status==="offline"||status==="comms");
+  const yr=2017+Math.floor(R()*10), mo=Math.floor(R()*12);
+  const commissioned=new Date(Math.min(new Date(yr,mo,1+Math.floor(R()*27)),new Date(2026,8,10)));
+  const name=`${customer.split(" ")[0]} ${c[0]} ${pick(SUFFIX[T[0]])}`;
+  SITES.push({id:"S-"+String(1001+i),idx:i,name,city:c[0],state:c[1],region:c[2],lat:c[3]+rnd(-.5,.5),lng:c[4]+rnd(-.5,.5),type:T[0],cap,customer,status,pr,
+    tariff:+rnd(3.4,7.6).toFixed(2),inv:clamp(Math.round(cap/(T[0]==="Ground-mount"?250:60)),1,48),daily,
+    todayExp,todayE:live?todayExp*frac*(pr/.8):(status==="comms"?null:0),nowKW:live?cap*Math.sin(Math.PI*(NOW_H-6)/12.5)*.86*WF[c[2]].today*(pr/.8):0,
+    commissioned,lastSeen:status==="comms"?`${2+Math.floor(R()*30)}h ago`:"2 min ago"});
+}
+// avoid duplicate names
+const seen={};SITES.forEach(s=>{seen[s.name]=(seen[s.name]||0)+1;if(seen[s.name]>1)s.name+=" "+seen[s.name]});
+
+const ALARM_TYPES=[["Inverter offline","critical"],["Grid overvoltage trip","critical"],["DC insulation resistance low","major"],["String current mismatch","major"],["Communication lost with datalogger","major"],["PR below expected for 3 days","minor"],["Energy meter data gap","minor"],["Inverter over-temperature derating","minor"],["Tracker stow position fault","major"]];
+const ALARMS=[];let aid=5001;
+SITES.forEach(s=>{
+  const n=s.status==="offline"?2:s.status==="degraded"?1+Math.floor(R()*2):s.status==="comms"?1:(R()<.12?1:0);
+  for(let k=0;k<n;k++){let t;
+    if(s.status==="offline")t=k?ALARM_TYPES[1]:ALARM_TYPES[0];else if(s.status==="comms")t=ALARM_TYPES[4];else if(s.status==="degraded")t=pick([ALARM_TYPES[2],ALARM_TYPES[3],ALARM_TYPES[5],ALARM_TYPES[7]]);else t=pick([ALARM_TYPES[3],ALARM_TYPES[5],ALARM_TYPES[6],ALARM_TYPES[7],ALARM_TYPES[8]]);
+    if(t[0].startsWith("Tracker")&&s.type!=="Ground-mount")t=ALARM_TYPES[6];
+    const hrs=Math.floor(R()*70)+1;const st=R()<.62?"open":R()<.7?"acknowledged":"cleared";
+    ALARMS.push({id:"A-"+(aid++),site:s.id,type:t[0],sev:t[1],device:t[0].includes("Inverter")||t[0].includes("String")||t[0].includes("insulation")?"INV-"+String(1+Math.floor(R()*s.inv)).padStart(2,"0"):t[0].includes("meter")?"MTR-01":t[0].includes("datalogger")?"DL-01":"Plant",hrs,state:st,ackBy:st!=="open"?"Divya Nair":null});
+  }});
+ALARMS.sort((a,b)=>a.hrs-b.hrs);
+
+/* Site groups: by customer, by region, and custom */
+const SG=[];
+CUSTOMERS.forEach((c,i)=>SG.push({id:"SG-C"+i,name:c,kind:"Customer",sites:SITES.filter(s=>s.customer===c).map(s=>s.id)}));
+REGIONS.forEach(r=>SG.push({id:"SG-R-"+r,name:r+" region",kind:"Region",sites:SITES.filter(s=>s.region===r).map(s=>s.id)}));
+SG.push({id:"SG-X1",name:"Utility scale (over 1 MWp)",kind:"Custom",sites:SITES.filter(s=>s.cap>=1000).map(s=>s.id)});
+SG.push({id:"SG-X2",name:"Commissioned 2026",kind:"Custom",sites:SITES.filter(s=>s.commissioned.getFullYear()===2026).map(s=>s.id)});
+SG.push({id:"SG-X3",name:"VoltCare O&M contract",kind:"Custom",sites:SITES.filter(s=>["West","North"].includes(s.region)&&s.type!=="Floating").map(s=>s.id)});
+
+/* Roles and permissions */
+const PERMS=[["view_dash","View dashboards and sites"],["view_devices","See inverter and device detail"],["view_financials","See revenue and tariffs"],["export_reports","Export and schedule reports"],["ack_alarms","Acknowledge alarms"],["edit_sites","Edit site settings"],["manage_users","Manage users and groups"],["approve_reg","Approve registration requests"],["manage_roles","Edit roles and permissions"],["view_audit","View audit log"]];
+const ROLES=[
+  {id:"platform_admin",name:"Platform Admin",desc:"Everything, across every customer and site.",perms:PERMS.map(p=>p[0]),locked:true},
+  {id:"customer_admin",name:"Customer Admin",desc:"Runs one customer's users and sees that customer's sites.",perms:["view_dash","view_devices","view_financials","export_reports","ack_alarms","manage_users","approve_reg","view_audit"]},
+  {id:"portfolio",name:"Portfolio Manager",desc:"Owns performance across a set of sites.",perms:["view_dash","view_devices","view_financials","export_reports","ack_alarms","edit_sites"]},
+  {id:"engineer",name:"O&M Engineer",desc:"Field and maintenance work on assigned sites.",perms:["view_dash","view_devices","export_reports","ack_alarms"]},
+  {id:"finance",name:"Finance Analyst",desc:"Energy and revenue reporting, no device access.",perms:["view_dash","view_financials","export_reports"]},
+  {id:"viewer",name:"Viewer",desc:"Read-only dashboards for assigned sites.",perms:["view_dash"]}];
+const roleById=id=>ROLES.find(r=>r.id===id);
+
+/* User groups grant site groups */
+const UG=[
+  {id:"UG1",name:"HQ Operations",desc:"Central monitoring desk",siteGroups:SG.filter(g=>g.kind==="Region").map(g=>g.id)},
+  {id:"UG2",name:"VoltCare O&M West & North",desc:"Contracted maintenance crew",siteGroups:["SG-X3"]},
+  {id:"UG3",name:"VoltCare O&M South",desc:"Contracted maintenance crew",siteGroups:["SG-R-South"]},
+  {id:"UG4",name:"East & Central field crew",desc:"In-house technicians",siteGroups:["SG-R-East","SG-R-Central"]},
+  {id:"UG5",name:"Finance, all customers",desc:"Billing and revenue team",siteGroups:SG.filter(g=>g.kind==="Customer").map(g=>g.id)},
+  ...CUSTOMERS.map((c,i)=>({id:"UG-C"+i,name:c+" team",desc:"Customer's own staff",siteGroups:["SG-C"+i]}))];
+
+const FIRST=["Aarav","Ishita","Kabir","Meera","Rohan","Tanvi","Nikhil","Pooja","Siddharth","Kavya","Aditya","Riya","Manish","Neha","Varun","Shreya","Harsh","Anjali","Karan","Lakshmi","Omkar","Priya","Yash","Zoya","Gaurav","Nandini","Tushar","Bhavna","Ravi","Sana","Deepak","Ira"];
+const LAST=["Sharma","Iyer","Patel","Reddy","Gupta","Menon","Joshi","Singh","Chatterjee","Kulkarni","Bose","Pillai","Verma","Shah","Naidu","Mishra"];
+const USERS=[
+  {id:"U1",name:"Ananya Rao",email:"ananya.rao@helio.example",role:"platform_admin",org:"HQ",groups:["UG1"],direct:[],status:"active",mfa:true,last:"Active now",persona:true},
+  {id:"U2",name:"Vikram Mehta",email:"vikram.mehta@helio.example",role:"portfolio",org:"HQ",groups:["UG-C0","UG-C1"],direct:[],status:"active",mfa:true,last:"18 min ago",persona:true},
+  {id:"U3",name:"Divya Nair",email:"divya@voltcare.example",role:"engineer",org:"VoltCare O&M",groups:["UG3"],direct:[],status:"active",mfa:true,last:"1 h ago",persona:true},
+  {id:"U4",name:"Rahul Jain",email:"rahul.jain@helio.example",role:"finance",org:"HQ",groups:["UG5"],direct:[],status:"active",mfa:false,last:"Yesterday",persona:true},
+  {id:"U5",name:"Sneha Kulkarni",email:"sneha@sunrisetextiles.example",role:"customer_admin",org:"Sunrise Textiles",groups:["UG-C0"],direct:[],status:"active",mfa:true,last:"3 h ago",persona:true},
+  {id:"U6",name:"Arjun Das",email:"arjun@kavericold.example",role:"viewer",org:"Kaveri Cold Chain",groups:[],direct:SITES.filter(s=>s.customer==="Kaveri Cold Chain").slice(0,6).map(s=>s.id),status:"active",mfa:false,last:"2 days ago",persona:true}];
+const ORGS=["HQ","VoltCare O&M",...CUSTOMERS];
+for(let i=0;i<58;i++){
+  const f=FIRST[i%FIRST.length],l=pick(LAST),org=pick(ORGS);
+  let role,groups;
+  if(org==="HQ"){role=pick(["portfolio","engineer","finance","viewer","platform_admin"]);groups=role==="finance"?["UG5"]:role==="engineer"?["UG4"]:["UG1"]}
+  else if(org==="VoltCare O&M"){role="engineer";groups=[pick(["UG2","UG3"])]}
+  else{const ci=CUSTOMERS.indexOf(org);role=pick(["viewer","viewer","finance","customer_admin","portfolio"]);groups=["UG-C"+ci]}
+  const dom=org==="HQ"?"helio.example":org==="VoltCare O&M"?"voltcare.example":org.split(" ")[0].toLowerCase()+".example";
+  const st=R()<.86?"active":R()<.5?"invited":"suspended";
+  USERS.push({id:"U"+(7+i),name:`${f} ${l}`,email:`${f.toLowerCase()}.${l.toLowerCase()}@${dom}`,role,org,groups,direct:[],status:st,mfa:R()<.7,last:st==="invited"?"Never":pick(["12 min ago","1 h ago","4 h ago","Yesterday","3 days ago","2 weeks ago"])});
+}
+const REQUESTS=[
+  {id:"RQ1",name:"Farhan Qureshi",email:"farhan@meridianauto.example",org:"Meridian Auto Parts",note:"Plant head at Pune, needs daily generation reports.",when:"Today, 09:12",suggest:"viewer"},
+  {id:"RQ2",name:"Lata Krishnan",email:"lata.k@greenfieldhospitals.example",org:"Greenfield Hospitals",note:"Accounts team, monthly savings statement.",when:"Today, 08:40",suggest:"finance"},
+  {id:"RQ3",name:"Mohit Saini",email:"mohit@voltcare.example",org:"VoltCare O&M",note:"New technician for Rajasthan cluster.",when:"Yesterday, 17:05",suggest:"engineer"},
+  {id:"RQ4",name:"Tara Fernandes",email:"tara@indusretail.example",org:"Indus Retail Malls",note:"Sustainability lead, ESG and CO₂ data.",when:"Yesterday, 11:22",suggest:"viewer"},
+  {id:"RQ5",name:"Sameer Kapoor",email:"sameer.kapoor@gmail.example",org:"Unknown",note:"Want to see solar data.",when:"28 Sep, 22:47",suggest:"viewer"}];
+const AUDIT=[];
+const auditSeed=[["Ananya Rao","Changed role","Rohan Patel: Viewer → Portfolio Manager"],["Sneha Kulkarni","Invited user","pooja.shah@sunrisetextiles.example"],["Divya Nair","Acknowledged alarm","A-5012 DC insulation resistance low"],["Ananya Rao","Added site to group","S-1188 → Utility scale (over 1 MWp)"],["Rahul Jain","Scheduled report","Monthly revenue, Finance all customers"],["Ananya Rao","Approved registration","mohit.v@voltcare.example as O&M Engineer"],["Vikram Mehta","Edited site","S-1043 tariff ₹5.40 → ₹5.65/kWh"],["Ananya Rao","Suspended user","former.contractor@voltcare.example"],["Sneha Kulkarni","Removed user from group","Sunrise Textiles team: ajay.k@sunrisetextiles.example"],["System","Locked account","6 failed sign-ins: sameer.kapoor@gmail.example"]];
+auditSeed.forEach((a,i)=>AUDIT.push({when:new Date(TODAY.getTime()-(i*7+2)*3600e3+ (NOW_H*3600e3)),actor:a[0],action:a[1],target:a[2],ip:`49.36.${12+i*7}.${40+i*11}`}));
+
+/* ---------- Derived helpers ---------- */
+const siteById=id=>SITES.find(s=>s.id===id);
+const state={me:"U1",view:"overview",siteId:null,sitesQ:"",sitesStatus:"all",sitesRegion:"all",sitesGroup:"all",sitesType:"all",sort:"name",dir:1,page:0,
+  rep:{scope:"all",period:30,by:"customer"},alarmF:"open",userTab:"people",userQ:"",groupTab:"user",loggedIn:true};
+const me=()=>USERS.find(u=>u.id===state.me);
+const myRole=()=>roleById(me().role);
+const can=p=>myRole().perms.includes(p);
+function accessibleSiteIds(u){
+  if(u.role==="platform_admin")return new Set(SITES.map(s=>s.id));
+  const set=new Set(u.direct);
+  u.groups.forEach(gid=>{const g=UG.find(x=>x.id===gid);g&&g.siteGroups.forEach(sgid=>{const sg=SG.find(x=>x.id===sgid);sg&&sg.sites.forEach(id=>set.add(id))})});
+  return set;
+}
+let scopeCache=null;
+const scope=()=>{if(!scopeCache){const ids=accessibleSiteIds(me());scopeCache=SITES.filter(s=>ids.has(s.id))}return scopeCache};
+const visibleSG=()=>{const ids=new Set(scope().map(s=>s.id));return SG.filter(g=>g.sites.some(id=>ids.has(id)))};
+const manageableUsers=()=>{const u=me();if(u.role==="platform_admin")return USERS;if(u.role==="customer_admin")return USERS.filter(x=>x.org===u.org);return[]};
+const assignableRoles=()=>me().role==="platform_admin"?ROLES:ROLES.filter(r=>["viewer","finance","engineer","portfolio"].includes(r.id));
+
+const fmtE=kwh=>kwh==null?"–":kwh>=1e6?(kwh/1e6).toFixed(2)+" GWh":kwh>=1e3?(kwh/1e3).toFixed(kwh>=1e5?0:1)+" MWh":Math.round(kwh)+" kWh";
+const fmtP=kw=>kw>=1000?(kw/1000).toFixed(2)+" MW":Math.round(kw)+" kW";
+const fmtCap=kwp=>kwp>=1000?(kwp/1000).toFixed(2)+" MWp":kwp+" kWp";
+const fmtINR=v=>v>=1e7?"₹"+(v/1e7).toFixed(2)+" Cr":v>=1e5?"₹"+(v/1e5).toFixed(2)+" L":"₹"+Math.round(v).toLocaleString("en-IN");
+const pct=v=>(v*100).toFixed(1)+"%";
+const sumE=(s,n=30)=>s.daily.slice(30-n).reduce((a,d)=>a+(d.e||0),0);
+const sumX=(s,n=30)=>s.daily.slice(30-n).reduce((a,d)=>a+d.exp,0);
+const prOf=(s,n=30)=>{const x=sumX(s,n);return x?sumE(s,n)/x*.8:0};
+const availOf=(s,n=30)=>{const d=s.daily.slice(30-n);return d.filter(x=>x.e&&x.e>0).length/d.length};
+const STATUS_LABEL={online:"Online",degraded:"Underperforming",offline:"Offline",comms:"No data"};
+const statusChip=s=>`<span class="chip s-${s}">${STATUS_LABEL[s]}</span>`;
+const CO2=0.716; // kg CO2 per kWh, India grid emission factor (CEA)
+
+/* ---------- Charts ---------- */
+function niceMax(v){if(v<=0)return 1;const p=10**Math.floor(Math.log10(v)),n=v/p;return(n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p}
+function barLine(points,{fmt=fmtE,h=230}={}){
+  const W=760,H=h,L=64,Rr=12,T=14,B=28,iw=W-L-Rr,ih=H-T-B;
+  const max=niceMax(Math.max(...points.map(p=>Math.max(p.a||0,p.b||0))));
+  const bw=iw/points.length;let g="";
+  for(let i=0;i<=4;i++){const y=T+ih-ih*i/4;g+=`<line x1="${L}" x2="${W-Rr}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${L-8}" y="${y+3}" text-anchor="end">${fmt(max*i/4)}</text>`}
+  points.forEach((p,i)=>{const x=L+i*bw+bw*.18,w=bw*.64,hh=(p.a||0)/max*ih;
+    g+=`<rect x="${x.toFixed(1)}" y="${(T+ih-hh).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(hh,0).toFixed(1)}" rx="2" fill="${p.gap?"var(--off-soft)":"var(--accent)"}"><title>${p.label}: ${fmt(p.a)} actual, ${fmt(p.b)} expected</title></rect>`;
+    const st=Math.ceil(points.length/8);if(i%st===0||(i===points.length-1&&i%st>=st/2))g+=`<text x="${(L+i*bw+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle">${p.label}</text>`});
+  const line=points.map((p,i)=>`${i?"L":"M"}${(L+i*bw+bw/2).toFixed(1)},${(T+ih-p.b/max*ih).toFixed(1)}`).join("");
+  g+=`<path d="${line}" fill="none" stroke="var(--brand)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Daily energy, actual vs expected">${g}</svg>`;
+}
+function intraday(s){
+  const W=760,H=230,L=64,Rr=12,T=14,B=28,iw=W-L-Rr,ih=H-T-B,wf=WF[s.region].today,rr=mulberry32(s.idx*97+3);
+  const pts=[];for(let t=5;t<=19;t+=.25){const x=(t-6)/12.5;const ex=x<0||x>1?0:s.cap*.86*Math.sin(Math.PI*x)*wf;
+    const live=!(s.status==="offline"||s.status==="comms");const ac=t<=NOW_H&&live?ex*(s.pr/.8)*(0.93+rr()*.1):null;pts.push({t,ex,ac})}
+  const max=niceMax(s.cap*.9);const X=t=>L+(t-5)/14*iw,Y=v=>T+ih-v/max*ih;let g="";
+  for(let i=0;i<=4;i++){const y=T+ih-ih*i/4;g+=`<line x1="${L}" x2="${W-Rr}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${y+3}" text-anchor="end">${fmtP(max*i/4)}</text>`}
+  for(let t=6;t<=18;t+=2)g+=`<text x="${X(t)}" y="${H-8}" text-anchor="middle">${String(t).padStart(2,"0")}:00</text>`;
+  g+=`<path d="${pts.map((p,i)=>`${i?"L":"M"}${X(p.t).toFixed(1)},${Y(p.ex).toFixed(1)}`).join("")}" fill="none" stroke="var(--brand)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  const a=pts.filter(p=>p.ac!=null);
+  if(a.length){const d=a.map((p,i)=>`${i?"L":"M"}${X(p.t).toFixed(1)},${Y(p.ac).toFixed(1)}`).join("");
+    g+=`<path d="${d}L${X(a[a.length-1].t)},${T+ih}L${X(a[0].t)},${T+ih}Z" fill="var(--accent)" opacity=".22"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>`;
+    const l=a[a.length-1];g+=`<circle cx="${X(l.t)}" cy="${Y(l.ac)}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`}
+  g+=`<line x1="${X(NOW_H)}" x2="${X(NOW_H)}" y1="${T}" y2="${T+ih}" stroke="var(--muted)" stroke-dasharray="2 3"/><text x="${X(NOW_H)+4}" y="${T+10}">now 14:30</text>`;
+  return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Power today">${g}</svg>`;
+}
+function siteMap(sites){
+  const W=520,H=560,minLat=7.5,maxLat=32,minLng=68,maxLng=93;
+  const X=l=>20+(l-minLng)/(maxLng-minLng)*(W-40),Y=l=>20+(maxLat-l)/(maxLat-minLat)*(H-40);
+  const col={online:"var(--ok)",degraded:"var(--warn)",offline:"var(--bad)",comms:"var(--off)"};
+  let g=`<rect x="0" y="0" width="${W}" height="${H}" fill="var(--surface-2)" rx="10"/>`;
+  for(let la=10;la<=30;la+=5)g+=`<line x1="12" x2="${W-12}" y1="${Y(la)}" y2="${Y(la)}" stroke="var(--line)"/><text x="16" y="${Y(la)-4}">${la}°N</text>`;
+  for(let ln=70;ln<=90;ln+=5)g+=`<line y1="12" y2="${H-12}" x1="${X(ln)}" x2="${X(ln)}" stroke="var(--line)"/><text x="${X(ln)+3}" y="${H-16}">${ln}°E</text>`;
+  [...sites].sort((a,b)=>(a.status==="online")-(b.status==="online")).reverse().forEach(s=>{
+    g+=`<circle cx="${X(s.lng).toFixed(1)}" cy="${Y(s.lat).toFixed(1)}" r="${(2.5+Math.sqrt(s.cap)/12).toFixed(1)}" fill="${col[s.status]}" fill-opacity=".7" stroke="var(--surface)" stroke-width=".8" data-site="${s.id}" style="cursor:pointer"><title>${esc(s.name)} · ${fmtCap(s.cap)} · ${STATUS_LABEL[s.status]}</title></circle>`});
+  return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Site locations">${g}</svg>`;
+}
+
+/* ---------- Views ---------- */
+const ICON={
+  overview:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
+  sites:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  reports:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
+  alarms:'<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/>',
+  users:'<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-4-5.5"/>',
+  groups:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  roles:'<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  audit:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>'};
+const svgI=(k,s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+const NAV=[["Monitor",[["overview","Overview","view_dash"],["sites","Sites","view_dash"],["reports","Reports","view_dash"],["alarms","Alarms","view_dash"]]],
+  ["Administration",[["users","Users","manage_users"],["groups","Groups and access","manage_users"],["roles","Roles","manage_users"],["audit","Audit log","view_audit"]]]];
+
+function shell(inner){
+  const u=me(),r=myRole(),sc=scope();
+  const openAl=ALARMS.filter(a=>a.state==="open"&&sc.some(s=>s.id===a.site)).length;
+  return`<div class="app"><aside class="side">
+    <div class="logo"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="7" fill="var(--accent)"/><g stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round"><path d="M16 2v4M16 26v4M2 16h4M26 16h4M6.1 6.1l2.8 2.8M23.1 23.1l2.8 2.8M6.1 25.9l2.8-2.8M23.1 8.9l2.8-2.8"/></g></svg>Helio Console</div>
+    <nav class="nav" aria-label="Main">${NAV.map(([lab,items])=>{const vis=items.filter(i=>can(i[2]));return vis.length?`<div class="nav-label">${lab}</div>`+vis.map(([id,name])=>`<button data-nav="${id}" ${state.view===id||(id==="sites"&&state.view==="site")?'aria-current="page"':""}>${svgI(id)}${name}${id==="alarms"&&openAl?`<span class="count">${openAl}</span>`:""}</button>`).join(""):""}).join("")}</nav>
+    <div class="me-card"><span class="eyebrow" style="color:inherit">Signed in</span><b>${esc(u.name)}</b><span>${r.name}</span><span>${sc.length} of ${SITES.length} sites · ${esc(u.org)}</span><button class="btn" style="margin-top:6px;background:transparent;color:inherit;border-color:var(--side-line)" data-action="logout">Sign out</button></div>
+  </aside><div class="main">
+    <header class="top"><div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="gsearch" type="search" placeholder="Jump to a site, city or customer" autocomplete="off" aria-label="Search sites"><div id="gresults"></div></div>
+      <div class="persona"><label for="persona" class="muted">Viewing as</label><select id="persona">${USERS.filter(x=>x.persona).map(x=>`<option value="${x.id}" ${x.id===u.id?"selected":""}>${esc(x.name)} · ${roleById(x.role).name}</option>`).join("")}</select></div>
+      <button class="btn" data-action="theme" aria-label="Toggle theme">◐</button><button class="btn mobile-only" data-action="logout">Sign out</button>
+    </header><main class="content">${inner}</main></div></div>`;
+}
+const pageHead=(title,sub,right="")=>`<div class="page-head"><div><h1>${title}</h1>${sub?`<p class="muted">${sub}</p>`:""}</div><div class="filters">${right}<span class="proto-note">Sample data</span></div></div>`;
+const locked=(what)=>`<div class="panel locked">${svgI("roles",36)}<h2>${what} is not part of your role</h2><p>${myRole().name} can't open this. An admin can change your role under Users.</p></div>`;
+
+function vOverview(){
+  const sc=scope();if(!sc.length)return pageHead("Overview")+`<div class="panel locked"><h2>No sites assigned yet</h2><p>Ask an admin to add you to a group.</p></div>`;
+  const cap=sc.reduce((a,s)=>a+s.cap,0),tE=sc.reduce((a,s)=>a+(s.todayE||0),0),tX=sc.reduce((a,s)=>a+s.todayExp*((1-Math.cos(Math.PI*(NOW_H-6)/12.5))/2),0);
+  const nowKW=sc.reduce((a,s)=>a+s.nowKW,0),e30=sc.reduce((a,s)=>a+sumE(s),0),x30=sc.reduce((a,s)=>a+sumX(s),0),pr=e30/x30*.8;
+  const rev=sc.reduce((a,s)=>a+sumE(s)*s.tariff,0);
+  const openAl=ALARMS.filter(a=>a.state==="open"&&sc.some(s=>s.id===a.site));
+  const counts={online:0,degraded:0,offline:0,comms:0};sc.forEach(s=>counts[s.status]++);
+  const pts=DAYS.map((d,i)=>({label:dlabel(d),a:sc.reduce((a,s)=>a+(s.daily[i].e||0),0),b:sc.reduce((a,s)=>a+s.daily[i].exp,0)}));
+  const ranked=sc.filter(s=>s.status!=="comms").map(s=>({s,pr:prOf(s,7)})).sort((a,b)=>a.pr-b.pr);
+  const worst=ranked.slice(0,6),best=ranked.slice(-6).reverse();
+  const row=x=>`<tr class="click" data-site="${x.s.id}"><td><div class="site-name">${esc(x.s.name)}</div><div class="sub">${x.s.city} · ${fmtCap(x.s.cap)}</div></td><td>${statusChip(x.s.status)}</td><td class="r num">${pct(x.pr)}</td></tr>`;
+  return pageHead("Portfolio overview",`${sc.length} sites in your access · Friday, 2 October 2026 · data as of 14:30 IST`)+
+  `<div class="kpis">
+    <div class="kpi"><span class="eyebrow">Live power</span><span class="v num">${fmtP(nowKW)}</span><span class="d">of ${fmtCap(cap)} installed</span></div>
+    <div class="kpi"><span class="eyebrow">Energy today</span><span class="v num">${fmtE(tE)}</span><span class="d ${tE>=tX?"up":"down"}">${tE>=tX?"▲":"▼"} ${pct(Math.abs(tE/tX-1))} vs expected</span></div>
+    <div class="kpi"><span class="eyebrow">Last 30 days</span><span class="v num">${fmtE(e30)}</span><span class="d">${(e30/cap/30).toFixed(2)} kWh/kWp/day</span></div>
+    <div class="kpi"><span class="eyebrow">Performance ratio</span><span class="v num">${pct(pr)}</span><span class="d">30-day, target 80%</span></div>
+    ${can("view_financials")?`<div class="kpi"><span class="eyebrow">Revenue, 30 days</span><span class="v num">${fmtINR(rev)}</span><span class="d">at contracted tariffs</span></div>`:`<div class="kpi"><span class="eyebrow">CO₂ avoided</span><span class="v num">${(e30*CO2/1000).toFixed(0)}<small>t</small></span><span class="d">30 days</span></div>`}
+    <div class="kpi"><span class="eyebrow">Open alarms</span><span class="v num" style="color:${openAl.length?"var(--bad)":"var(--ok)"}">${openAl.length}</span><span class="d">${openAl.filter(a=>a.sev==="critical").length} critical</span></div>
+  </div>
+  <div class="grid g-3-1">
+    <section class="panel"><div class="panel-head"><h2>Daily generation</h2><div class="legend"><span><i style="background:var(--accent)"></i>Actual</span><span><i style="background:var(--brand)"></i>Expected at 80% PR</span></div></div>${barLine(pts)}</section>
+    <section class="panel"><div class="panel-head"><h2>Site status</h2><span class="muted">${sc.length} sites</span></div>
+      <div class="status-bars">${Object.entries(counts).map(([k,v])=>`<button class="sb-row" style="all:unset;cursor:pointer;display:grid;grid-template-columns:110px minmax(0,1fr) 44px;gap:10px;align-items:center" data-statusjump="${k}"><span>${STATUS_LABEL[k]}</span><span class="sb-track"><span class="sb-fill" style="display:block;width:${v/sc.length*100}%;background:var(--${k==="online"?"ok":k==="degraded"?"warn":k==="offline"?"bad":"off"})"></span></span><span class="num" style="text-align:right">${v}</span></button>`).join("")}</div>
+      <div class="hint" style="margin-top:16px">Underperforming means 7-day PR more than 8 points below the site's baseline. No data means the datalogger hasn't reported for over 2 hours.</div>
+    </section>
+  </div>
+  <div class="grid g-2">
+    <section class="panel"><div class="panel-head"><h2>Needs attention</h2><span class="muted">lowest 7-day PR</span></div><div class="tbl-wrap"><table><thead><tr><th>Site</th><th>Status</th><th class="r">PR</th></tr></thead><tbody>${worst.map(row).join("")}</tbody></table></div></section>
+    <section class="panel"><div class="panel-head"><h2>Top performers</h2><span class="muted">highest 7-day PR</span></div><div class="tbl-wrap"><table><thead><tr><th>Site</th><th>Status</th><th class="r">PR</th></tr></thead><tbody>${best.map(row).join("")}</tbody></table></div></section>
+  </div>
+  <section class="panel"><div class="panel-head"><h2>Site map</h2><div class="legend"><span><i style="background:var(--ok)"></i>Online</span><span><i style="background:var(--warn)"></i>Underperforming</span><span><i style="background:var(--bad)"></i>Offline</span><span><i style="background:var(--off)"></i>No data</span><span>Dot size = capacity</span></div></div>
+    <div style="max-width:560px;margin:0 auto">${siteMap(sc)}</div></section>`;
+}
+
+function filteredSites(){
+  const q=state.sitesQ.toLowerCase();let list=scope().filter(s=>
+    (state.sitesStatus==="all"||s.status===state.sitesStatus)&&(state.sitesRegion==="all"||s.region===state.sitesRegion)&&(state.sitesType==="all"||s.type===state.sitesType)&&
+    (state.sitesGroup==="all"||SG.find(g=>g.id===state.sitesGroup).sites.includes(s.id))&&(!q||(s.name+s.city+s.state+s.customer+s.id).toLowerCase().includes(q)));
+  const key={name:s=>s.name,cap:s=>s.cap,today:s=>s.todayE??-1,pr:s=>prOf(s,7),status:s=>s.status,city:s=>s.city,rev:s=>sumE(s)*s.tariff}[state.sort];
+  list.sort((a,b)=>{const x=key(a),y=key(b);return(x>y?1:x<y?-1:0)*state.dir});return list;
+}
+function vSites(){
+  const list=filteredSites(),per=25,pages=Math.max(1,Math.ceil(list.length/per));state.page=Math.min(state.page,pages-1);
+  const rows=list.slice(state.page*per,state.page*per+per);const fin=can("view_financials");
+  const th=(k,l,r)=>`<th class="sortable ${r?"r":""}" data-sort="${k}" aria-sort="${state.sort===k?(state.dir>0?"ascending":"descending"):"none"}">${l}${state.sort===k?(state.dir>0?" ↑":" ↓"):""}</th>`;
+  return pageHead("Sites",`${list.length} of ${scope().length} sites in your access`)+
+  `<section class="panel"><div class="filters" style="margin-bottom:12px">
+    <input id="sq" type="search" placeholder="Filter by name, city, customer" value="${esc(state.sitesQ)}" style="flex:1 1 200px">
+    <select id="fstatus" aria-label="Status"><option value="all">All statuses</option>${Object.entries(STATUS_LABEL).map(([k,v])=>`<option value="${k}" ${state.sitesStatus===k?"selected":""}>${v}</option>`).join("")}</select>
+    <select id="fregion" aria-label="Region"><option value="all">All regions</option>${REGIONS.map(r=>`<option ${state.sitesRegion===r?"selected":""}>${r}</option>`).join("")}</select>
+    <select id="ftype" aria-label="Type"><option value="all">All types</option>${TYPES.map(t=>`<option ${state.sitesType===t[0]?"selected":""}>${t[0]}</option>`).join("")}</select>
+    <select id="fgroup" aria-label="Site group"><option value="all">All site groups</option>${visibleSG().map(g=>`<option value="${g.id}" ${state.sitesGroup===g.id?"selected":""}>${esc(g.name)}</option>`).join("")}</select>
+  </div><div class="tbl-wrap"><table><thead><tr>${th("name","Site")}${th("city","Location")}${th("status","Status")}${th("cap","Capacity",1)}<th class="r">Live power</th>${th("today","Today",1)}${th("pr","PR 7d",1)}${fin?th("rev","Revenue 30d",1):""}<th>Last data</th></tr></thead><tbody>
+  ${rows.map(s=>`<tr class="click" data-site="${s.id}"><td><div class="site-name">${esc(s.name)}</div><div class="sub">${s.id} · ${s.type} · ${esc(s.customer)}</div></td><td>${s.city}<div class="sub">${s.state}</div></td><td>${statusChip(s.status)}</td><td class="r num">${fmtCap(s.cap)}</td><td class="r num">${s.status==="comms"?"–":fmtP(s.nowKW)}</td><td class="r num">${fmtE(s.todayE)}</td><td class="r num">${s.status==="comms"?"–":pct(prOf(s,7))}</td>${fin?`<td class="r num">${fmtINR(sumE(s)*s.tariff)}</td>`:""}<td class="sub">${s.lastSeen}</td></tr>`).join("")||`<tr><td colspan="9" class="muted" style="padding:24px;text-align:center">No sites match these filters.</td></tr>`}
+  </tbody></table></div><div class="pager"><span class="muted">Showing ${list.length?state.page*per+1:0}–${Math.min(list.length,state.page*per+per)} of ${list.length}</span><span class="filters"><button class="btn" data-page="-1" ${state.page===0?"disabled":""}>Previous</button><span class="num">${state.page+1} / ${pages}</span><button class="btn" data-page="1" ${state.page>=pages-1?"disabled":""}>Next</button></span></div>
+  ${fin?"":`<p class="hint" style="margin-top:12px">Revenue columns are hidden for ${myRole().name}.</p>`}</section>`;
+}
+
+function inverters(s){
+  const rr=mulberry32(s.idx*131+7);const per=s.cap/s.inv;
+  return[...Array(s.inv)].map((_,i)=>{let st="ok";const al=ALARMS.find(a=>a.site===s.id&&a.device==="INV-"+String(i+1).padStart(2,"0")&&a.state!=="cleared");
+    if(s.status==="offline")st="bad";else if(al)st=al.sev==="critical"?"bad":"warn";const live=st!=="bad"&&s.status!=="comms";
+    return{name:"INV-"+String(i+1).padStart(2,"0"),rated:Math.round(per),kw:live?s.nowKW/s.inv*(0.9+rr()*.18):0,today:live?(s.todayE||0)/s.inv*(0.9+rr()*.18):0,temp:live?Math.round(42+rr()*14):Math.round(30+rr()*4),st,al}});
+}
+function vSite(){
+  const s=siteById(state.siteId);if(!s||!scope().includes(s))return pageHead("Site not available")+locked("This site");
+  const al=ALARMS.filter(a=>a.site===s.id),fin=can("view_financials");
+  const pts=DAYS.map((d,i)=>({label:dlabel(d),a:s.daily[i].e||0,b:s.daily[i].exp,gap:s.daily[i].gap}));
+  const access=USERS.filter(u=>accessibleSiteIds(u).has(s.id));
+  return`<button class="back" data-nav="sites">← All sites</button>`+
+  pageHead(esc(s.name),`${s.id} · ${s.type} · ${s.city}, ${s.state} · ${esc(s.customer)}`,statusChip(s.status))+
+  `<div class="kpis">
+    <div class="kpi"><span class="eyebrow">Live power</span><span class="v num">${s.status==="comms"?"–":fmtP(s.nowKW)}</span><span class="d">${s.status==="comms"?"last data "+s.lastSeen:pct(s.nowKW/s.cap)+" of capacity"}</span></div>
+    <div class="kpi"><span class="eyebrow">Energy today</span><span class="v num">${fmtE(s.todayE)}</span><span class="d">expected ${fmtE(s.todayExp)} by sunset</span></div>
+    <div class="kpi"><span class="eyebrow">Specific yield</span><span class="v num">${(sumE(s,7)/s.cap/7).toFixed(2)}</span><span class="d">kWh/kWp/day, 7 days</span></div>
+    <div class="kpi"><span class="eyebrow">PR, 30 days</span><span class="v num">${pct(prOf(s))}</span><span class="d">availability ${pct(availOf(s))}</span></div>
+    ${fin?`<div class="kpi"><span class="eyebrow">Revenue, 30 days</span><span class="v num">${fmtINR(sumE(s)*s.tariff)}</span><span class="d">₹${s.tariff}/kWh tariff</span></div>`:`<div class="kpi"><span class="eyebrow">CO₂ avoided</span><span class="v num">${(sumE(s)*CO2/1000).toFixed(1)}<small>t</small></span><span class="d">30 days</span></div>`}
+    <div class="kpi"><span class="eyebrow">Capacity</span><span class="v num">${fmtCap(s.cap)}</span><span class="d">${s.inv} inverters</span></div>
+  </div>
+  <div class="grid g-2">
+    <section class="panel"><div class="panel-head"><h2>Power today</h2><div class="legend"><span><i style="background:var(--accent)"></i>AC power</span><span><i style="background:var(--brand)"></i>Expected</span></div></div>${intraday(s)}</section>
+    <section class="panel"><div class="panel-head"><h2>Daily energy, 30 days</h2><div class="legend"><span><i style="background:var(--accent)"></i>Actual</span><span><i style="background:var(--off-soft)"></i>No data</span><span><i style="background:var(--brand)"></i>Expected</span></div></div>${barLine(pts)}</section>
+  </div>
+  <section class="panel"><div class="panel-head"><h2>Inverters</h2><span class="muted">${s.inv} units, ~${Math.round(s.cap/s.inv)} kW each</span></div>
+  ${can("view_devices")?`<div class="inv-grid">${inverters(s).map(v=>`<div class="inv ${v.st==="ok"?"":v.st}"><span class="eyebrow">${v.name}</span><b>${fmtP(v.kw)}</b><span class="muted">${fmtE(v.today)} today · ${v.temp}°C</span>${v.al?`<span style="color:var(--${v.st==="bad"?"bad":"warn"})">${esc(v.al.type)}</span>`:""}</div>`).join("")}</div>`:`<p class="hint">Device detail is hidden for ${myRole().name}. Site totals above are still accurate.</p>`}</section>
+  <div class="grid g-2">
+    <section class="panel"><div class="panel-head"><h2>Alarms</h2><span class="muted">${al.filter(a=>a.state==="open").length} open</span></div>${al.length?alarmTable(al,false):`<p class="muted">No alarms in the last 3 days.</p>`}</section>
+    <section class="panel"><div class="panel-head"><h2>Site details</h2>${can("edit_sites")?`<button class="btn" data-action="editsite">Edit</button>`:""}</div>
+      <dl class="kv"><dt>Commissioned</dt><dd>${s.commissioned.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}</dd><dt>Coordinates</dt><dd class="mono">${s.lat.toFixed(3)}°N, ${s.lng.toFixed(3)}°E</dd><dt>Site groups</dt><dd>${SG.filter(g=>g.sites.includes(s.id)).map(g=>`<span class="tag">${esc(g.name)}</span>`).join("")}</dd>${fin?`<dt>Tariff</dt><dd>₹${s.tariff}/kWh</dd>`:""}
+      ${can("manage_users")?`<dt>People with access</dt><dd>${access.length} users <span class="sub">(${[...new Set(access.map(u=>roleById(u.role).name))].join(", ")})</span></dd>`:""}</dl></section>
+  </div>`;
+}
+
+function alarmTable(list,showSite=true){
+  const ack=can("ack_alarms");
+  return`<div class="tbl-wrap"><table><thead><tr><th>Severity</th>${showSite?"<th>Site</th>":""}<th>Alarm</th><th>Device</th><th>Raised</th><th>State</th><th></th></tr></thead><tbody>${list.map(a=>{const s=siteById(a.site);
+    return`<tr><td><span class="chip sev-${a.sev}">${a.sev[0].toUpperCase()+a.sev.slice(1)}</span></td>${showSite?`<td class="click" data-site="${s.id}" style="cursor:pointer"><div class="site-name">${esc(s.name)}</div><div class="sub">${s.city}</div></td>`:""}<td>${esc(a.type)}</td><td class="mono">${a.device}</td><td class="sub">${a.hrs<24?a.hrs+" h ago":Math.floor(a.hrs/24)+" d ago"}</td><td>${a.state==="open"?"Open":a.state==="acknowledged"?`Acknowledged<div class="sub">by ${esc(a.ackBy)}</div>`:"Cleared"}</td><td>${a.state==="open"&&ack?`<button class="btn" data-ack="${a.id}">Acknowledge</button>`:""}</td></tr>`}).join("")}</tbody></table></div>`;
+}
+function vAlarms(){
+  const ids=new Set(scope().map(s=>s.id));const all=ALARMS.filter(a=>ids.has(a.site));
+  const list=all.filter(a=>state.alarmF==="all"||a.state===state.alarmF);
+  return pageHead("Alarms",`${all.filter(a=>a.state==="open").length} open across ${new Set(all.filter(a=>a.state==="open").map(a=>a.site)).size} sites`,
+    `<div class="seg" role="group" aria-label="Alarm state">${[["open","Open"],["acknowledged","Acknowledged"],["cleared","Cleared"],["all","All"]].map(([k,l])=>`<button data-alarmf="${k}" aria-pressed="${state.alarmF===k}">${l}</button>`).join("")}</div>`)+
+  `<section class="panel">${list.length?alarmTable(list.slice(0,80)):`<p class="muted">Nothing here.</p>`}${list.length>80?`<p class="sub">Showing the 80 most recent of ${list.length}.</p>`:""}${can("ack_alarms")?"":`<p class="hint" style="margin-top:12px">${myRole().name} can see alarms but not acknowledge them.</p>`}</section>`;
+}
+
+function reportRows(){
+  const r=state.rep;let sites=scope();if(r.scope!=="all"){const g=SG.find(x=>x.id===r.scope);sites=sites.filter(s=>g.sites.includes(s.id))}
+  const key={customer:s=>s.customer,region:s=>s.region,type:s=>s.type,site:s=>s.name}[r.by];const groups={};
+  sites.forEach(s=>{(groups[key(s)]=groups[key(s)]||[]).push(s)});
+  return{sites,rows:Object.entries(groups).map(([k,ss])=>{const e=ss.reduce((a,s)=>a+sumE(s,r.period),0),x=ss.reduce((a,s)=>a+sumX(s,r.period),0);
+    return{k,n:ss.length,cap:ss.reduce((a,s)=>a+s.cap,0),e,x,pr:x?e/x*.8:0,av:ss.reduce((a,s)=>a+availOf(s,r.period),0)/ss.length,rev:ss.reduce((a,s)=>a+sumE(s,r.period)*s.tariff,0)}}).sort((a,b)=>b.e-a.e)};
+}
+function vReports(){
+  const r=state.rep,{sites,rows}=reportRows(),fin=can("view_financials"),exp=can("export_reports");
+  const tot=rows.reduce((a,x)=>({e:a.e+x.e,x:a.x+x.x,cap:a.cap+x.cap,rev:a.rev+x.rev}),{e:0,x:0,cap:0,rev:0});
+  const pts=DAYS.slice(30-r.period).map((d,j)=>{const i=30-r.period+j;return{label:dlabel(d),a:sites.reduce((a,s)=>a+(s.daily[i].e||0),0),b:sites.reduce((a,s)=>a+s.daily[i].exp,0)}});
+  const shown=r.by==="site"?rows.slice(0,40):rows;
+  return pageHead("Reports",`Generation report · ${sites.length} sites · ${dlabel(DAYS[30-r.period])} to ${dlabel(DAYS[29])} 2026`,
+    exp?`<button class="btn" data-action="copycsv">Copy as CSV</button><button class="btn accent" data-action="schedule">Schedule email</button>`:"")+
+  `<section class="panel"><div class="filters">
+    <label class="field" style="grid-template-columns:auto auto;align-items:center">Scope <select id="rscope"><option value="all">All my sites</option>${visibleSG().map(g=>`<option value="${g.id}" ${r.scope===g.id?"selected":""}>${esc(g.name)}</option>`).join("")}</select></label>
+    <div class="seg" role="group" aria-label="Period">${[[7,"7 days"],[14,"14 days"],[30,"30 days"]].map(([k,l])=>`<button data-period="${k}" aria-pressed="${r.period===k}">${l}</button>`).join("")}</div>
+    <div class="seg" role="group" aria-label="Group by">${[["customer","Customer"],["region","Region"],["type","Plant type"],["site","Site"]].map(([k,l])=>`<button data-by="${k}" aria-pressed="${r.by===k}">${l}</button>`).join("")}</div>
+  </div></section>
+  <div class="kpis">
+    <div class="kpi"><span class="eyebrow">Energy</span><span class="v num">${fmtE(tot.e)}</span><span class="d">${(tot.e/tot.cap/r.period).toFixed(2)} kWh/kWp/day</span></div>
+    <div class="kpi"><span class="eyebrow">Expected</span><span class="v num">${fmtE(tot.x)}</span><span class="d ${tot.e>=tot.x?"up":"down"}">${tot.e>=tot.x?"+":"−"}${pct(Math.abs(tot.e/tot.x-1))} variance</span></div>
+    <div class="kpi"><span class="eyebrow">Performance ratio</span><span class="v num">${pct(tot.e/tot.x*.8)}</span><span class="d">weather-adjusted</span></div>
+    <div class="kpi"><span class="eyebrow">CO₂ avoided</span><span class="v num">${(tot.e*CO2/1000).toFixed(0)}<small>t</small></span><span class="d">0.716 kg/kWh grid factor</span></div>
+    ${fin?`<div class="kpi"><span class="eyebrow">Revenue</span><span class="v num">${fmtINR(tot.rev)}</span><span class="d">avg ₹${(tot.rev/tot.e).toFixed(2)}/kWh</span></div>`:`<div class="kpi"><span class="eyebrow">Homes powered</span><span class="v num">${Math.round(tot.e/ (90*r.period/30)).toLocaleString("en-IN")}</span><span class="d">at 90 kWh/month</span></div>`}
+    <div class="kpi"><span class="eyebrow">Capacity</span><span class="v num">${fmtCap(tot.cap)}</span><span class="d">${sites.length} sites</span></div>
+  </div>
+  <section class="panel"><div class="panel-head"><h2>Daily energy vs expected</h2><div class="legend"><span><i style="background:var(--accent)"></i>Actual</span><span><i style="background:var(--brand)"></i>Expected</span></div></div>${barLine(pts)}</section>
+  <section class="panel"><div class="panel-head"><h2>By ${{customer:"customer",region:"region",type:"plant type",site:"site"}[r.by]}</h2>${r.by==="site"&&rows.length>40?`<span class="muted">Top 40 of ${rows.length} by energy</span>`:""}</div>
+  <div class="tbl-wrap"><table><thead><tr><th>${{customer:"Customer",region:"Region",type:"Type",site:"Site"}[r.by]}</th><th class="r">Sites</th><th class="r">Capacity</th><th class="r">Energy</th><th class="r">Expected</th><th class="r">Variance</th><th class="r">PR</th><th class="r">Availability</th>${fin?'<th class="r">Revenue</th>':""}</tr></thead><tbody>
+  ${shown.map(x=>`<tr><td class="site-name">${esc(x.k)}</td><td class="r num">${x.n}</td><td class="r num">${fmtCap(x.cap)}</td><td class="r num">${fmtE(x.e)}</td><td class="r num">${fmtE(x.x)}</td><td class="r num ${x.e>=x.x?"up":"down"}">${x.e>=x.x?"+":"−"}${pct(Math.abs(x.e/x.x-1))}</td><td class="r num">${pct(x.pr)}</td><td class="r num">${pct(x.av)}</td>${fin?`<td class="r num">${fmtINR(x.rev)}</td>`:""}</tr>`).join("")}
+  </tbody></table></div>${exp?"":`<p class="hint" style="margin-top:12px">Export and scheduling are not part of the ${myRole().name} role.</p>`}</section>`;
+}
+
+function vUsers(){
+  if(!can("manage_users"))return pageHead("Users")+locked("User management");
+  const list=manageableUsers(),q=state.userQ.toLowerCase();const rows=list.filter(u=>!q||(u.name+u.email+u.org+roleById(u.role).name).toLowerCase().includes(q));
+  const reqs=me().role==="platform_admin"?REQUESTS:REQUESTS.filter(r=>r.org===me().org);
+  const tab=state.userTab;
+  const head=pageHead("Users",me().role==="platform_admin"?`${list.length} people across ${ORGS.length} organisations`:`${list.length} people in ${esc(me().org)}. Customer Admins only see their own organisation.`,`<button class="btn primary" data-action="invite">Invite user</button>`);
+  const tabs=`<div class="tabs" role="tablist">${[["people","People"],["requests",`Registration requests (${reqs.length})`]].map(([k,l])=>`<button role="tab" data-utab="${k}" aria-selected="${tab===k}">${l}</button>`).join("")}</div>`;
+  if(tab==="requests")return head+`<section class="panel">${tabs}<div style="margin-top:12px">${reqs.length?`<div class="tbl-wrap"><table><thead><tr><th>Person</th><th>Organisation</th><th>Reason given</th><th>Requested</th><th></th></tr></thead><tbody>${reqs.map(r=>`<tr><td><div class="site-name">${esc(r.name)}</div><div class="sub">${esc(r.email)}</div></td><td>${esc(r.org)}${r.org==="Unknown"?' <span class="chip sev-critical plain">Unverified domain</span>':""}</td><td style="white-space:normal;min-width:220px">${esc(r.note)}</td><td class="sub">${r.when}</td><td><span class="filters" style="flex-wrap:nowrap"><button class="btn primary" data-approve="${r.id}" ${can("approve_reg")?"":"disabled"}>Review</button><button class="btn danger" data-reject="${r.id}" ${can("approve_reg")?"":"disabled"}>Reject</button></span></td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">No pending requests.</p>`}</div>
+    <p class="hint" style="margin-top:12px">People can request access from the sign-in page. Nothing is visible to them until an admin approves the request and assigns a role and at least one group.</p></section>`;
+  return head+`<section class="panel">${tabs}<div class="filters" style="margin:12px 0"><input id="uq" type="search" placeholder="Search name, email, organisation, role" value="${esc(state.userQ)}" style="flex:1 1 240px"></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Person</th><th>Role</th><th>Organisation</th><th>Groups</th><th class="r">Sites</th><th>Status</th><th>2FA</th><th>Last active</th></tr></thead><tbody>
+  ${rows.map(u=>`<tr class="click" data-user="${u.id}"><td><div class="site-name">${esc(u.name)}</div><div class="sub">${esc(u.email)}</div></td><td><span class="chip role plain">${roleById(u.role).name}</span></td><td>${esc(u.org)}</td><td style="white-space:normal;min-width:160px">${u.groups.map(g=>`<span class="tag">${esc(UG.find(x=>x.id===g).name)}</span>`).join("")}${u.direct.length?`<span class="tag">+${u.direct.length} direct sites</span>`:""}</td><td class="r num">${accessibleSiteIds(u).size}</td><td>${u.status==="active"?'<span class="chip s-online">Active</span>':u.status==="invited"?'<span class="chip s-degraded">Invited</span>':'<span class="chip s-offline">Suspended</span>'}</td><td>${u.mfa?'<span class="yes">On</span>':'<span class="no">Off</span>'}</td><td class="sub">${u.last}</td></tr>`).join("")}
+  </tbody></table></div></section>`;
+}
+function vGroups(){
+  if(!can("manage_users"))return pageHead("Groups and access")+locked("Group management");
+  const t=state.groupTab;const isPA=me().role==="platform_admin";
+  const ugs=isPA?UG:UG.filter(g=>manageableUsers().some(u=>u.groups.includes(g.id)));
+  const sgs=isPA?SG:visibleSG();
+  const tabs=`<div class="tabs" role="tablist"><button role="tab" data-gtab="user" aria-selected="${t==="user"}">User groups (${ugs.length})</button><button role="tab" data-gtab="site" aria-selected="${t==="site"}">Site groups (${sgs.length})</button></div>`;
+  const explain=`<div class="hint"><b>How access works.</b> A person's <b>role</b> decides what they can do. Their <b>user groups</b> decide which sites they can see: each user group is linked to one or more <b>site groups</b>. A person can also be given individual sites directly.</div>`;
+  return pageHead("Groups and access","Who sees which sites")+explain+`<section class="panel">${tabs}<div class="cards" style="margin-top:14px">${t==="user"?ugs.map(g=>{const mem=USERS.filter(u=>u.groups.includes(g.id));const sites=new Set();g.siteGroups.forEach(id=>SG.find(x=>x.id===id).sites.forEach(s=>sites.add(s)));
+    return`<button class="card" data-ug="${g.id}"><h3>${esc(g.name)}</h3><span class="muted">${esc(g.desc)}</span><div>${g.siteGroups.slice(0,3).map(id=>`<span class="tag">${esc(SG.find(x=>x.id===id).name)}</span>`).join("")}${g.siteGroups.length>3?`<span class="tag">+${g.siteGroups.length-3}</span>`:""}</div><div class="meta"><span><b>${mem.length}</b> people</span><span><b>${sites.size}</b> sites</span></div></button>`}).join("")
+    :sgs.map(g=>`<button class="card" data-sg="${g.id}"><span class="eyebrow">${g.kind}</span><h3>${esc(g.name)}</h3><div class="meta"><span><b>${g.sites.length}</b> sites</span><span><b>${fmtCap(g.sites.reduce((a,id)=>a+siteById(id).cap,0))}</b></span><span><b>${UG.filter(u=>u.siteGroups.includes(g.id)).length}</b> user groups</span></div></button>`).join("")}</div></section>`;
+}
+function vRoles(){
+  if(!can("manage_users"))return pageHead("Roles")+locked("Roles");
+  const edit=can("manage_roles");
+  return pageHead("Roles and permissions",edit?"Tick a box to change what a role can do. Platform Admin is fixed.":"You can see roles but only a Platform Admin can change them.",edit?`<button class="btn" data-action="newrole">New role</button>`:"")+
+  `<section class="panel"><div class="tbl-wrap"><table class="matrix"><thead><tr><th>Permission</th>${ROLES.map(r=>`<th class="c">${r.name}<div class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${(n=>n+(n===1?" person":" people"))(USERS.filter(u=>u.role===r.id).length)}</div></th>`).join("")}</tr></thead><tbody>
+  ${PERMS.map(([p,l])=>`<tr><td>${l}</td>${ROLES.map(r=>`<td class="c"><input type="checkbox" aria-label="${r.name}: ${l}" data-perm="${r.id}|${p}" ${r.perms.includes(p)?"checked":""} ${!edit||r.locked?"disabled":""}></td>`).join("")}</tr>`).join("")}
+  </tbody></table></div></section>
+  <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${ROLES.map(r=>`<div class="card" style="cursor:default"><h3>${r.name}</h3><span class="muted">${r.desc}</span><div class="meta"><span><b>${r.perms.length}</b> of ${PERMS.length} permissions</span></div></div>`).join("")}</div>`;
+}
+function vAudit(){
+  if(!can("view_audit"))return pageHead("Audit log")+locked("The audit log");
+  const list=me().role==="platform_admin"?AUDIT:AUDIT.filter(a=>manageableUsers().some(u=>u.name===a.actor));
+  return pageHead("Audit log","Every change to people, access and sites, newest first")+`<section class="panel"><div class="tbl-wrap"><table><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Details</th><th>IP address</th></tr></thead><tbody>${list.sort((a,b)=>b.when-a.when).map(a=>`<tr><td class="num sub">${a.when.toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</td><td>${esc(a.actor)}</td><td>${esc(a.action)}</td><td style="white-space:normal;min-width:240px">${esc(a.target)}</td><td class="mono sub">${a.ip}</td></tr>`).join("")||'<tr><td colspan="5" class="muted">No entries.</td></tr>'}</tbody></table></div></section>`;
+}
+
+function vLogin(){
+  return`<div class="login"><div class="login-art"><canvas id="sky" aria-hidden="true"></canvas><div class="logo">Helio Console</div><div><h1>Every site, every kilowatt, one screen.</h1><p style="max-width:44ch">Monitoring and reporting for multi-site solar portfolios, with access set per person, per group and per site.</p></div><span class="mono" style="font-size:.8rem">${SITES.length} sites · ${fmtCap(SITES.reduce((a,s)=>a+s.cap,0))} · sample data</span></div>
+  <form class="login-form" id="loginform"><div><h2 style="font-size:1.4rem">Sign in</h2><p class="muted">This prototype has no real accounts. Pick a demo person below to see what each role sees.</p></div>
+    <div class="field"><label for="lemail">Work email</label><input id="lemail" type="email" placeholder="you@company.com" autocomplete="off"></div>
+    <div class="field"><label for="lpass">Password</label><input id="lpass" type="password" placeholder="••••••••" autocomplete="off"></div>
+    <button class="btn primary" type="submit" style="justify-content:center">Sign in</button>
+    <span class="eyebrow">Or continue as a demo person</span>
+    <div class="personas">${USERS.filter(u=>u.persona).map(u=>`<button type="button" data-persona="${u.id}"><span><b>${esc(u.name)}</b><div class="sub">${esc(u.org)}</div></span><span class="chip role plain">${roleById(u.role).name}</span></button>`).join("")}</div>
+    <p class="sub">No account? <a href="#" data-action="request" style="color:var(--brand)">Request access</a> and an admin will review it.</p>
+  </form></div>`;
+}
+
+/* ---------- Drawers ---------- */
+function openDrawer(html){document.getElementById("layer").innerHTML=`<div class="drawer-bg" data-action="close"></div><aside class="drawer" role="dialog" aria-modal="true">${html}</aside>`;const f=document.querySelector(".drawer input,.drawer select,.drawer button");f&&f.focus()}
+const closeDrawer=()=>document.getElementById("layer").innerHTML="";
+const dHead=(t,sub)=>`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div><h2>${t}</h2>${sub?`<p class="muted" style="margin:4px 0 0">${sub}</p>`:""}</div><button class="btn" data-action="close" aria-label="Close">✕</button></div>`;
+function userDrawer(id){
+  const u=USERS.find(x=>x.id===id),r=roleById(u.role),ids=accessibleSiteIds(u);
+  const canEditRole=assignableRoles().some(x=>x.id===u.role)||me().role==="platform_admin";
+  const grpList=me().role==="platform_admin"?UG:UG.filter(g=>g.id==="UG-C"+CUSTOMERS.indexOf(me().org));
+  openDrawer(dHead(esc(u.name),`${esc(u.email)} · ${esc(u.org)}`)+
+  `<div class="field"><label for="urole">Role</label><select id="urole" ${canEditRole&&u.id!==me().id?"":"disabled"}>${(canEditRole?assignableRoles():[r]).map(x=>`<option value="${x.id}" ${x.id===u.role?"selected":""}>${x.name}</option>`).join("")}</select><span class="sub">${r.desc}</span></div>
+  <div class="field"><span style="font-weight:600">User groups</span><div class="checks">${grpList.map(g=>`<label><input type="checkbox" data-ugcheck="${g.id}" ${u.groups.includes(g.id)?"checked":""} ${u.id===me().id?"disabled":""}> ${esc(g.name)}</label>`).join("")}</div></div>
+  <div class="field"><span style="font-weight:600">What ${esc(u.name.split(" ")[0])} can do</span><div class="perm-list">${PERMS.map(([p,l])=>`<span class="${r.perms.includes(p)?"yes":"no"}">${r.perms.includes(p)?"✓":"–"} <span style="color:var(--ink)">${l}</span></span>`).join("")}</div></div>
+  <div class="field"><span style="font-weight:600">Sites ${esc(u.name.split(" ")[0])} can see: ${ids.size}</span><div class="sub">${[...ids].slice(0,8).map(id=>esc(siteById(id).name)).join(", ")}${ids.size>8?` and ${ids.size-8} more`:""}</div></div>
+  <dl class="kv"><dt>Status</dt><dd>${u.status}</dd><dt>Two-factor sign-in</dt><dd>${u.mfa?"On":"Off"}</dd><dt>Last active</dt><dd>${u.last}</dd></dl>
+  <div class="filters"><button class="btn primary" data-saveuser="${u.id}" ${u.id===me().id?"disabled":""}>Save changes</button>${u.id!==me().id?`<button class="btn ${u.status==="suspended"?"":"danger"}" data-suspend="${u.id}">${u.status==="suspended"?"Reactivate":"Suspend"}</button>${u.status==="invited"?`<button class="btn" data-resend="${u.id}">Resend invite</button>`:""}`:""}</div>
+  ${u.id===me().id?'<p class="hint">You can\'t change your own role or groups. Ask another admin.</p>':""}`);
+}
+function inviteDrawer(prefill){
+  const grpList=me().role==="platform_admin"?UG:UG.filter(g=>g.id==="UG-C"+CUSTOMERS.indexOf(me().org));
+  openDrawer(dHead(prefill?"Approve access request":"Invite user",prefill?esc(prefill.note):"They'll get an email link to set a password and turn on two-factor sign-in.")+
+  `<form id="inviteform" style="display:grid;gap:14px">
+  <div class="field"><label for="iname">Full name</label><input id="iname" required value="${prefill?esc(prefill.name):""}"></div>
+  <div class="field"><label for="iemail">Work email</label><input id="iemail" type="email" required value="${prefill?esc(prefill.email):""}"></div>
+  <div class="field"><label for="iorg">Organisation</label><select id="iorg" ${me().role!=="platform_admin"?"disabled":""}>${(me().role==="platform_admin"?ORGS:[me().org]).map(o=>`<option ${prefill&&prefill.org===o?"selected":""}>${esc(o)}</option>`).join("")}</select></div>
+  <div class="field"><label for="irole">Role</label><select id="irole">${assignableRoles().map(r=>`<option value="${r.id}" ${prefill&&prefill.suggest===r.id?"selected":""}>${r.name}</option>`).join("")}</select></div>
+  <div class="field"><span style="font-weight:600">User groups</span><div class="checks">${grpList.map(g=>`<label><input type="checkbox" data-igroup="${g.id}" ${grpList.length===1?"checked":""}> ${esc(g.name)}</label>`).join("")}</div></div>
+  <button class="btn primary" type="submit" data-req="${prefill?prefill.id:""}">${prefill?"Approve and send invite":"Send invite"}</button></form>`);
+}
+function ugDrawer(id){
+  const g=UG.find(x=>x.id===id),mem=USERS.filter(u=>u.groups.includes(g.id)),isPA=me().role==="platform_admin";
+  openDrawer(dHead(esc(g.name),esc(g.desc))+
+  `<div class="field"><span style="font-weight:600">Site groups this team can see</span><div class="checks">${SG.filter(x=>isPA||g.siteGroups.includes(x.id)).map(x=>`<label><input type="checkbox" data-sgcheck="${x.id}" ${g.siteGroups.includes(x.id)?"checked":""} ${isPA?"":"disabled"}> ${esc(x.name)} <span class="sub">(${x.sites.length})</span></label>`).join("")}</div>${isPA?"":'<span class="sub">Only a Platform Admin can change which sites a group covers.</span>'}</div>
+  <div class="field"><span style="font-weight:600">Members (${mem.length})</span><div class="tbl-wrap" style="margin:0"><table><tbody>${mem.map(u=>`<tr><td>${esc(u.name)}<div class="sub">${esc(u.email)}</div></td><td><span class="chip role plain">${roleById(u.role).name}</span></td></tr>`).join("")||'<tr><td class="muted">No members yet.</td></tr>'}</tbody></table></div></div>
+  ${isPA?`<button class="btn primary" data-saveug="${g.id}">Save changes</button>`:""}`);
+}
+function sgDrawer(id){
+  const g=SG.find(x=>x.id===id),ids=new Set(scope().map(s=>s.id));const ss=g.sites.map(siteById).filter(s=>ids.has(s.id));
+  openDrawer(dHead(esc(g.name),`${g.kind} group · ${g.sites.length} sites · ${fmtCap(g.sites.reduce((a,i)=>a+siteById(i).cap,0))}`)+
+  `<div class="field"><span style="font-weight:600">Linked user groups</span><div>${UG.filter(u=>u.siteGroups.includes(g.id)).map(u=>`<span class="tag">${esc(u.name)}</span>`).join("")||'<span class="muted">None</span>'}</div></div>
+  ${g.kind!=="Custom"?`<p class="hint">${g.kind} groups update themselves when a site's ${g.kind.toLowerCase()} changes. Custom groups are picked by hand or by a rule.</p>`:""}
+  <div class="tbl-wrap" style="margin:0"><table><thead><tr><th>Site</th><th>Status</th><th class="r">Capacity</th></tr></thead><tbody>${ss.slice(0,60).map(s=>`<tr class="click" data-site="${s.id}"><td>${esc(s.name)}<div class="sub">${s.city}</div></td><td>${statusChip(s.status)}</td><td class="r num">${fmtCap(s.cap)}</td></tr>`).join("")}</tbody></table></div>${ss.length>60?`<p class="sub">and ${ss.length-60} more</p>`:""}`);
+}
+function scheduleDrawer(){
+  openDrawer(dHead("Schedule this report","Sends a PDF and CSV to the people you list.")+
+  `<form id="schedform" style="display:grid;gap:14px"><div class="field"><label for="sfreq">How often</label><select id="sfreq"><option>Daily at 19:00</option><option>Every Monday at 08:00</option><option selected>1st of each month at 08:00</option></select></div>
+  <div class="field"><label for="sto">Send to</label><input id="sto" value="${esc(me().email)}"></div><p class="hint">Recipients only receive figures for sites they have access to. Revenue is left out for anyone whose role can't see it.</p>
+  <button class="btn primary" type="submit">Schedule</button></form>`);
+}
+
+/* ---------- Render + events ---------- */
+let toastT;function toast(m){clearTimeout(toastT);let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";t.setAttribute("role","status");document.body.appendChild(t)}t.textContent=m;toastT=setTimeout(()=>t.remove(),2600)}
+function log(action,target){AUDIT.push({when:new Date(TODAY.getTime()+NOW_H*3600e3+AUDIT.length*1000),actor:me().name,action,target,ip:"49.36.88.10"})}
+const VIEWS={overview:vOverview,sites:vSites,site:vSite,reports:vReports,alarms:vAlarms,users:vUsers,groups:vGroups,roles:vRoles,audit:vAudit};
+function render(){
+  const root=document.getElementById("root");
+  if(!state.loggedIn){root.innerHTML=vLogin();drawSky();return}
+  root.innerHTML=shell(VIEWS[state.view]());
+}
+function go(view,extra={}){Object.assign(state,{view},extra);closeDrawer();render();window.scrollTo(0,0)}
+function drawSky(){const c=document.getElementById("sky");if(!c)return;const r=c.getBoundingClientRect(),dpr=devicePixelRatio||1;c.width=r.width*dpr;c.height=r.height*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);
+  const col=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#E9A100";const rr=mulberry32(9);
+  for(let i=0;i<SITES.length;i++){const s=SITES[i];const px=(s.lng-68)/25*r.width,py=(32-s.lat)/24.5*r.height;x.globalAlpha=.25+rr()*.5;x.fillStyle=col;x.beginPath();x.arc(px,py,1.5+Math.sqrt(s.cap)/20,0,7);x.fill()}}
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-nav],[data-site],[data-action],[data-sort],[data-page],[data-statusjump],[data-alarmf],[data-ack],[data-period],[data-by],[data-utab],[data-gtab],[data-user],[data-ug],[data-sg],[data-approve],[data-reject],[data-saveuser],[data-suspend],[data-resend],[data-saveug],[data-persona],[data-gres]");
+  if(!t)return;const d=t.dataset;
+  if(d.nav)return go(d.nav);
+  if(d.gres){document.getElementById("gresults").innerHTML="";return go("site",{siteId:d.gres})}
+  if(d.site)return go("site",{siteId:d.site});
+  if(d.statusjump)return go("sites",{sitesStatus:d.statusjump,page:0});
+  if(d.sort){state.dir=state.sort===d.sort?-state.dir:1;state.sort=d.sort;return render()}
+  if(d.page){state.page+=+d.page;render();return}
+  if(d.alarmf){state.alarmF=d.alarmf;return render()}
+  if(d.ack){const a=ALARMS.find(x=>x.id===d.ack);a.state="acknowledged";a.ackBy=me().name;log("Acknowledged alarm",`${a.id} ${a.type} at ${siteById(a.site).name}`);toast("Alarm acknowledged");return render()}
+  if(d.period){state.rep.period=+d.period;return render()}
+  if(d.by){state.rep.by=d.by;return render()}
+  if(d.utab){state.userTab=d.utab;return render()}
+  if(d.gtab){state.groupTab=d.gtab;return render()}
+  if(d.user)return userDrawer(d.user);
+  if(d.ug)return ugDrawer(d.ug);
+  if(d.sg)return sgDrawer(d.sg);
+  if(d.approve)return inviteDrawer(REQUESTS.find(r=>r.id===d.approve));
+  if(d.reject){const i=REQUESTS.findIndex(r=>r.id===d.reject);log("Rejected registration",REQUESTS[i].email);REQUESTS.splice(i,1);toast("Request rejected");return render()}
+  if(d.persona){state.me=d.persona;state.loggedIn=true;scopeCache=null;return go("overview",{sitesGroup:"all",rep:{...state.rep,scope:"all"},page:0})}
+  if(d.saveuser){const u=USERS.find(x=>x.id===d.saveuser);const nr=document.getElementById("urole").value;const ng=[...document.querySelectorAll("[data-ugcheck]")].filter(c=>c.checked).map(c=>c.dataset.ugcheck);
+    const keep=me().role==="platform_admin"?[]:u.groups.filter(g=>!document.querySelector(`[data-ugcheck="${g}"]`));
+    if(nr!==u.role)log("Changed role",`${u.name}: ${roleById(u.role).name} → ${roleById(nr).name}`);u.role=nr;u.groups=[...keep,...ng];log("Updated groups",`${u.name}: ${u.groups.map(g=>UG.find(x=>x.id===g).name).join(", ")||"none"}`);
+    scopeCache=null;closeDrawer();toast("Saved. Access updates on their next page load");return render()}
+  if(d.suspend){const u=USERS.find(x=>x.id===d.suspend);u.status=u.status==="suspended"?"active":"suspended";log(u.status==="suspended"?"Suspended user":"Reactivated user",u.email);toast(u.status==="suspended"?"User suspended and signed out":"User reactivated");closeDrawer();return render()}
+  if(d.resend){toast("Invite sent again");return}
+  if(d.saveug){const g=UG.find(x=>x.id===d.saveug);g.siteGroups=[...document.querySelectorAll("[data-sgcheck]")].filter(c=>c.checked).map(c=>c.dataset.sgcheck);log("Changed group access",`${g.name}: ${g.siteGroups.length} site groups`);scopeCache=null;closeDrawer();toast("Group access saved");return render()}
+  const a=d.action;
+  if(a==="close")return closeDrawer();
+  if(a==="logout"){state.loggedIn=false;return render()}
+  if(a==="theme"){const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark";return}
+  if(a==="invite")return inviteDrawer();
+  if(a==="schedule")return scheduleDrawer();
+  if(a==="request"){e.preventDefault();toast("The request form would open here");return}
+  if(a==="editsite"){toast("Site editing opens a form here (not built in the prototype)");return}
+  if(a==="newrole"){toast("New role form would open here");return}
+  if(a==="copycsv"){const{rows}=reportRows();const csv=["Group,Sites,Capacity kWp,Energy kWh,Expected kWh,PR"+(can("view_financials")?",Revenue INR":""),...rows.map(x=>[`"${x.k}"`,x.n,x.cap,Math.round(x.e),Math.round(x.x),(x.pr*100).toFixed(1)+(can("view_financials")?","+Math.round(x.rev):"")].join(","))].join("\n");
+    navigator.clipboard.writeText(csv).then(()=>toast(`Copied ${rows.length} rows`)).catch(()=>toast("Clipboard is blocked here"));log("Exported report",`${rows.length} rows`);return}
+});
+document.addEventListener("change",e=>{
+  const id=e.target.id;
+  if(id==="persona"){state.me=e.target.value;scopeCache=null;const v=state.view;return go(["users","groups","roles","audit"].includes(v)?v:v==="site"?"overview":v,{sitesGroup:"all",rep:{...state.rep,scope:"all"},page:0})}
+  if(id==="fstatus"){state.sitesStatus=e.target.value;state.page=0;return render()}
+  if(id==="fregion"){state.sitesRegion=e.target.value;state.page=0;return render()}
+  if(id==="ftype"){state.sitesType=e.target.value;state.page=0;return render()}
+  if(id==="fgroup"){state.sitesGroup=e.target.value;state.page=0;return render()}
+  if(id==="rscope"){state.rep.scope=e.target.value;return render()}
+  if(e.target.dataset.perm){const[rid,p]=e.target.dataset.perm.split("|");const r=roleById(rid);r.perms=e.target.checked?[...r.perms,p]:r.perms.filter(x=>x!==p);log("Changed role permission",`${r.name}: ${e.target.checked?"granted":"removed"} "${PERMS.find(x=>x[0]===p)[1]}"`);toast("Role updated");if(rid===me().role)render()}
+});
+let typeT;
+document.addEventListener("input",e=>{
+  const id=e.target.id;
+  if(id==="sq"||id==="uq"){clearTimeout(typeT);typeT=setTimeout(()=>{if(id==="sq"){state.sitesQ=e.target.value;state.page=0}else state.userQ=e.target.value;const pos=e.target.selectionStart;render();const el=document.getElementById(id);el.focus();el.setSelectionRange(pos,pos)},180)}
+  if(id==="gsearch"){const q=e.target.value.toLowerCase().trim();const box=document.getElementById("gresults");if(!q){box.innerHTML="";return}
+    const hits=scope().filter(s=>(s.name+s.city+s.customer+s.id).toLowerCase().includes(q)).slice(0,8);
+    box.innerHTML=`<div class="search-results">${hits.map(s=>`<button data-gres="${s.id}"><span>${esc(s.name)}<div class="sub">${s.city} · ${s.id}</div></span>${statusChip(s.status)}</button>`).join("")||'<div style="padding:10px 12px" class="muted">No sites in your access match.</div>'}</div>`}
+});
+document.addEventListener("submit",e=>{
+  e.preventDefault();const f=e.target;
+  if(f.id==="loginform"){toast("Pick a demo person to sign in");return}
+  if(f.id==="schedform"){log("Scheduled report",document.getElementById("sfreq").value);closeDrawer();toast("Report scheduled");return}
+  if(f.id==="inviteform"){const name=document.getElementById("iname").value.trim(),email=document.getElementById("iemail").value.trim();if(!name||!email)return;
+    const groups=[...document.querySelectorAll("[data-igroup]")].filter(c=>c.checked).map(c=>c.dataset.igroup);
+    if(!groups.length){toast("Pick at least one group so they can see some sites");return}
+    USERS.push({id:"U"+(USERS.length+100),name,email,role:document.getElementById("irole").value,org:document.getElementById("iorg").value,groups,direct:[],status:"invited",mfa:false,last:"Never"});
+    const rq=f.querySelector("[data-req]").dataset.req;if(rq){REQUESTS.splice(REQUESTS.findIndex(r=>r.id===rq),1);log("Approved registration",email)}else log("Invited user",email);
+    closeDrawer();toast(rq?"Approved. Invite sent":"Invite sent");state.userTab="people";render()}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer();if(e.key==="Enter"&&e.target.matches("tr.click"))e.target.click()});
+render();
+</script>
