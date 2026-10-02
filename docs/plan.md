@@ -1,6 +1,6 @@
 # New solar portal: plan
 
-Status: draft, 2 Oct 2026. The existing portal (solar.ionest.cloud) has not been reviewed yet because the project's network policy blocks that host. Section 6 will be filled in from a read-only walkthrough once it is allowed.
+Status: draft, 2 Oct 2026. The existing portal (solar.ionest.cloud) was reviewed read-only on 2 Oct 2026; see section 6.
 
 Prototype: https://claude.ai/artifact/REq5Ni562DSKLNpHxRTzbh (sample data, 360 sites, 64 users)
 
@@ -64,7 +64,25 @@ Energy (kWh), expected energy (weather-adjusted at target PR), variance, perform
 
 ## 6. Existing portal inventory
 
-Pending: needs solar.ionest.cloud allowed in Project settings → Network access.
+Full walkthrough: `existing-portal.md` (screenshots in the project folder `solar-portal/existing-portal/`).
+
+io.Nest is a single-customer view: Plants, plant detail, Reports, Support, Alerts, Change password, plus staff-only Plant setup, Renewals, Parameter report and Gateways. Its strengths, now carried into the prototype:
+
+- Plain-language assistant briefing on the home and plant screens.
+- Multi-source sites: solar with grid import/export and diesel sets, site load and solar share.
+- Six live views of a plant: equipment mimic, energy flow, gauges, single-line, contribution, weather.
+- Site conditions from a weather forecast and "versus forecast" check.
+- ₹ saved (grid and diesel rates), CO₂ and trees equivalent.
+- Day/Week/Month/Year chart by source, with a data table.
+- Raw logger registers per device.
+- Report types: daily, monthly, interval readings, any-parameter report; PDF/Excel/CSV.
+- Support tickets answered first by automatic checks, then by staff.
+- Subscriptions with automatic downtime credit, fees and tariffs.
+- Password rules and a theme that follows sunrise and sunset.
+
+What it lacks, and the prototype already covers: organisations, user groups, site groups, editable roles, invitations and registration approval, 2FA, audit log, a portfolio view for hundreds of sites, PR and availability, alarm acknowledgement and scheduled report emails.
+
+New permissions added for this: "Answer and resolve support tickets" (Platform Admin, Portfolio Manager, O&M Engineer) and "Manage subscriptions and renewals" (Platform Admin, Finance Analyst).
 
 ## 7. Open questions
 

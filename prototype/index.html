@@ -221,6 +221,23 @@ table.edit input{padding:5px 8px;border:1px solid var(--line);border-radius:6px;
   .login-form{padding:24px 16px}
 }
 @media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.perm-list{grid-template-columns:minmax(0,1fr)}}
+.brief{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:16px;box-shadow:var(--shadow)}
+.brief p{margin:2px 0}.brief-ic{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent-ink)}
+.link{all:unset;cursor:pointer;color:var(--brand);font-weight:600;font-size:.86rem;margin-top:6px;display:inline-block}.link:focus-visible{outline:2px solid var(--accent)}
+.sub-card{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:10px;padding:10px 14px;margin-bottom:16px}.sub-card.due{border-left-color:var(--warn)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.kpis-4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important;margin-bottom:16px}
+.seg-wide{display:flex;width:100%;overflow-x:auto}.seg-wide button{flex:1 0 auto;text-align:center}
+.diag{margin-top:10px}.diag text{fill:var(--ink)}.diag .dg-lab{font-size:12px;font-weight:700;letter-spacing:.06em}.diag .dg-val{font-size:20px;font-weight:700;font-family:var(--f-mono)}.diag .dg-big{font-size:40px;font-weight:700;font-family:var(--f-mono)}.diag text.dg-sub{font-size:11.5px;fill:var(--muted)}
+.flow-line{stroke-dasharray:6 8;animation:flow 1.1s linear infinite}.flow-line.rev{animation-direction:reverse}@keyframes flow{to{stroke-dashoffset:-28}}
+.cond{border-top:1px solid var(--line);margin-top:12px;padding-top:12px;display:grid;gap:10px}.cond-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.cond-row>div{background:var(--surface-2);border-radius:8px;padding:8px 10px;display:grid}.est{font-size:.65rem;font-weight:700;background:var(--line);border-radius:4px;padding:0 4px;text-transform:uppercase}
+.vs{display:grid;gap:2px;border-radius:8px;padding:10px 12px;background:var(--surface-2);border-left:4px solid var(--off)}.vs.up{border-left-color:var(--ok)}.vs.down{border-left-color:var(--bad)}
+.keys{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}.key{all:unset;cursor:pointer;display:inline-flex;gap:6px;align-items:center;font-size:.82rem;padding:3px 10px;border:1px solid var(--line);border-radius:99px}.key i{width:10px;height:10px;border-radius:3px;display:inline-block}.key[aria-pressed="false"]{opacity:.45;text-decoration:line-through}.key.static{cursor:default}.key:focus-visible{outline:2px solid var(--accent)}
+.regs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;align-items:start}.reg{border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}.reg summary{display:flex;gap:8px;align-items:baseline;padding:10px 12px;cursor:pointer}.reg dl{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:4px 10px;margin:0;padding:0 12px 12px;font-size:.82rem}.reg dt{color:var(--muted);font-family:var(--f-mono)}.reg dd{margin:0;text-align:right}
+.conv{display:grid;gap:10px}.msg{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--surface)}.msg p{margin:4px 0 0;white-space:pre-wrap}.msg.auto{background:var(--brand-soft);border-color:transparent}.msg.mine{background:var(--accent-soft);border-color:transparent;margin-left:24px}
+.rules{margin:4px 0 0;padding-left:0;list-style:none;display:grid;gap:2px;font-size:.82rem;color:var(--muted)}.rules li::before{content:"○ "}.rules li.yes{color:var(--ok)}.rules li.yes::before{content:"✓ "}
+.checks.params{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+@media (max-width:640px){.cond-row{grid-template-columns:repeat(2,minmax(0,1fr))}.reg dl{grid-template-columns:auto 1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -289,13 +306,13 @@ SG.push({id:"SG-X2",name:"Commissioned 2026",kind:"Custom",sites:SITES.filter(s=
 SG.push({id:"SG-X3",name:"VoltCare O&M contract",kind:"Custom",sites:SITES.filter(s=>["West","North"].includes(s.region)&&s.type!=="Floating").map(s=>s.id)});
 
 /* Roles and permissions */
-const PERMS=[["view_dash","View dashboards and sites"],["view_devices","See inverter and device detail"],["view_financials","See revenue and tariffs"],["export_reports","Export and schedule reports"],["ack_alarms","Acknowledge alarms"],["edit_sites","Edit site settings"],["manage_users","Manage users and groups"],["approve_reg","Approve registration requests"],["manage_roles","Edit roles and permissions"],["view_audit","View audit log"]];
+const PERMS=[["view_dash","View dashboards and sites"],["view_devices","See inverter and device detail"],["view_financials","See revenue and tariffs"],["export_reports","Export and schedule reports"],["ack_alarms","Acknowledge alarms"],["edit_sites","Edit site settings"],["manage_users","Manage users and groups"],["approve_reg","Approve registration requests"],["manage_roles","Edit roles and permissions"],["view_audit","View audit log"],["handle_tickets","Answer and resolve support tickets"],["manage_billing","Manage subscriptions and renewals"]];
 const ROLES=[
   {id:"platform_admin",name:"Platform Admin",desc:"Everything, across every customer and site.",perms:PERMS.map(p=>p[0]),locked:true},
   {id:"customer_admin",name:"Customer Admin",desc:"Runs one customer's users and sees that customer's sites.",perms:["view_dash","view_devices","view_financials","export_reports","ack_alarms","manage_users","approve_reg","view_audit"]},
-  {id:"portfolio",name:"Portfolio Manager",desc:"Owns performance across a set of sites.",perms:["view_dash","view_devices","view_financials","export_reports","ack_alarms","edit_sites"]},
-  {id:"engineer",name:"O&M Engineer",desc:"Field and maintenance work on assigned sites.",perms:["view_dash","view_devices","export_reports","ack_alarms"]},
-  {id:"finance",name:"Finance Analyst",desc:"Energy and revenue reporting, no device access.",perms:["view_dash","view_financials","export_reports"]},
+  {id:"portfolio",name:"Portfolio Manager",desc:"Owns performance across a set of sites.",perms:["view_dash","view_devices","view_financials","export_reports","ack_alarms","edit_sites","handle_tickets"]},
+  {id:"engineer",name:"O&M Engineer",desc:"Field and maintenance work on assigned sites.",perms:["view_dash","view_devices","export_reports","ack_alarms","handle_tickets"]},
+  {id:"finance",name:"Finance Analyst",desc:"Energy and revenue reporting, no device access.",perms:["view_dash","view_financials","export_reports","manage_billing"]},
   {id:"viewer",name:"Viewer",desc:"Read-only dashboards for assigned sites.",perms:["view_dash"]}];
 const roleById=id=>ROLES.find(r=>r.id===id);
 
@@ -341,7 +358,9 @@ auditSeed.forEach((a,i)=>AUDIT.push({when:new Date(TODAY.getTime()-(i*7+2)*3600e
 /* ---------- Derived helpers ---------- */
 const siteById=id=>SITES.find(s=>s.id===id);
 const state={me:"U1",view:"overview",siteId:null,sitesQ:"",sitesStatus:"all",sitesRegion:"all",sitesGroup:"all",sitesType:"all",sort:"name",dir:1,page:0,
-  rep:{scope:"all",period:30,by:"customer"},alarmF:"open",userTab:"people",userQ:"",groupTab:"user",loggedIn:true};
+  rep:{scope:"all",period:30,by:"customer"},alarmF:"open",userTab:"people",userQ:"",groupTab:"user",loggedIn:true,
+  diag:"plant",chartRange:"day",hideSrc:{},showNums:false,tickF:"active",renewF:"30",theme:"auto"};
+state.rep.mode="portfolio";state.rep.type="daily";state.rep.range="30";state.rep.interval="15";state.rep.params=[];
 const me=()=>USERS.find(u=>u.id===state.me);
 const myRole=()=>roleById(me().role);
 const can=p=>myRole().perms.includes(p);
@@ -420,10 +439,13 @@ const ICON={
   users:'<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-4-5.5"/>',
   groups:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
   roles:'<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  support:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"/>',
+  renewals:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',
+  spark:'<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.5"/>',
   audit:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>'};
 const svgI=(k,s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
-const NAV=[["Monitor",[["overview","Overview","view_dash"],["sites","Sites","view_dash"],["reports","Reports","view_dash"],["alarms","Alarms","view_dash"]]],
-  ["Administration",[["users","Users","manage_users"],["groups","Groups and access","manage_users"],["roles","Roles","manage_users"],["audit","Audit log","view_audit"]]]];
+const NAV=[["Monitor",[["overview","Overview","view_dash"],["sites","Sites","view_dash"],["reports","Reports","view_dash"],["alarms","Alarms","view_dash"],["support","Support","view_dash"]]],
+  ["Administration",[["users","Users","manage_users"],["groups","Groups and access","manage_users"],["roles","Roles","manage_users"],["renewals","Renewals","manage_billing"],["audit","Audit log","view_audit"]]]];
 
 function shell(inner){
   const u=me(),r=myRole(),sc=scope();
@@ -431,11 +453,11 @@ function shell(inner){
   return`<div class="app"><aside class="side">
     <div class="logo"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="7" fill="var(--accent)"/><g stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round"><path d="M16 2v4M16 26v4M2 16h4M26 16h4M6.1 6.1l2.8 2.8M23.1 23.1l2.8 2.8M6.1 25.9l2.8-2.8M23.1 8.9l2.8-2.8"/></g></svg>Helio Console</div>
     <nav class="nav" aria-label="Main">${NAV.map(([lab,items])=>{const vis=items.filter(i=>can(i[2]));return vis.length?`<div class="nav-label">${lab}</div>`+vis.map(([id,name])=>`<button data-nav="${id}" ${state.view===id||(id==="sites"&&["site","siteForm"].includes(state.view))?'aria-current="page"':""}>${svgI(id)}${name}${id==="alarms"&&openAl?`<span class="count">${openAl}</span>`:""}</button>`).join(""):""}).join("")}</nav>
-    <div class="me-card"><span class="eyebrow" style="color:inherit">Signed in</span><b>${esc(u.name)}</b><span>${r.name}</span><span>${sc.length} of ${SITES.length} sites · ${esc(u.org)}</span><button class="btn" style="margin-top:6px;background:transparent;color:inherit;border-color:var(--side-line)" data-action="logout">Sign out</button></div>
+    <div class="me-card"><span class="eyebrow" style="color:inherit">Signed in</span><b>${esc(u.name)}</b><span>${r.name}</span><span>${sc.length} of ${SITES.length} sites · ${esc(u.org)}</span><span class="filters" style="margin-top:6px"><button class="btn" style="background:transparent;color:inherit;border-color:var(--side-line)" data-action="account">Your account</button><button class="btn" style="background:transparent;color:inherit;border-color:var(--side-line)" data-action="logout">Sign out</button></span></div>
   </aside><div class="main">
     <header class="top"><div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="gsearch" type="search" placeholder="Jump to a site, city or customer" autocomplete="off" aria-label="Search sites"><div id="gresults"></div></div>
       <div class="persona"><label for="persona" class="muted">Viewing as</label><select id="persona">${USERS.filter(x=>x.persona).map(x=>`<option value="${x.id}" ${x.id===u.id?"selected":""}>${esc(x.name)} · ${roleById(x.role).name}</option>`).join("")}</select></div>
-      <button class="btn" data-action="theme" aria-label="Toggle theme">◐</button><button class="btn mobile-only" data-action="logout">Sign out</button>
+      <button class="btn" data-action="theme" aria-label="Theme: ${{auto:"follows sunrise and sunset",light:"always light",dark:"always dark"}[state.theme]}" title="Theme: ${{auto:"follows sunrise and sunset",light:"always light",dark:"always dark"}[state.theme]}">${state.theme==="auto"?"◐":state.theme==="light"?"☀":"☾"}</button><button class="btn mobile-only" data-action="account">Account</button><button class="btn mobile-only" data-action="logout">Sign out</button>
     </header><main class="content">${inner}</main></div></div>`;
 }
 const pageHead=(title,sub,right="")=>`<div class="page-head"><div><h1>${title}</h1>${sub?`<p class="muted">${sub}</p>`:""}</div><div class="filters">${right}<span class="proto-note">Sample data</span></div></div>`;
@@ -452,7 +474,7 @@ function vOverview(){
   const ranked=sc.filter(s=>s.status!=="comms").map(s=>({s,pr:prOf(s,7)})).sort((a,b)=>a.pr-b.pr);
   const worst=ranked.slice(0,6),best=ranked.slice(-6).reverse();
   const row=x=>`<tr class="click" data-site="${x.s.id}"><td><div class="site-name">${esc(x.s.name)}</div><div class="sub">${x.s.city} · ${fmtCap(x.s.cap)}</div></td><td>${statusChip(x.s.status)}</td><td class="r num">${pct(x.pr)}</td></tr>`;
-  return pageHead("Portfolio overview",`${sc.length} sites in your access · Friday, 2 October 2026 · data as of 14:30 IST`)+
+  return pageHead("Portfolio overview",`${sc.length} sites in your access · Friday, 2 October 2026 · data as of 14:30 IST`)+overviewBrief(sc)+
   `<div class="kpis">
     <div class="kpi"><span class="eyebrow">Live power</span><span class="v num">${fmtP(nowKW)}</span><span class="d">of ${fmtCap(cap)} installed</span></div>
     <div class="kpi"><span class="eyebrow">Energy today</span><span class="v num">${fmtE(tE)}</span><span class="d ${tE>=tX?"up":"down"}">${tE>=tX?"▲":"▼"} ${pct(Math.abs(tE/tX-1))} vs expected</span></div>
@@ -513,7 +535,7 @@ function vSite(){
   const access=USERS.filter(u=>accessibleSiteIds(u).has(s.id));
   return`<button class="back" data-nav="sites">← All sites</button>`+
   pageHead(esc(s.name),`${s.id} · ${s.type} · ${s.city}, ${s.state} · ${esc(s.customer)}`,statusChip(s.status)+(can("edit_sites")?`<button class="btn" data-sfaction="edit">Site settings</button>`:""))+(s.isNew?`<div class="notice warn"><b>Waiting for the first readings.</b> New sites usually start reporting within 15 minutes of the data connection going live. Charts fill in from then.</div>`:"")+
-  `<div class="kpis">
+  siteBrief(s)+subscriptionCard(s)+`<div class="kpis">
     <div class="kpi"><span class="eyebrow">Live power</span><span class="v num">${s.status==="comms"?"–":fmtP(s.nowKW)}</span><span class="d">${s.status==="comms"?"last data "+s.lastSeen:pct(s.nowKW/s.cap)+" of capacity"}</span></div>
     <div class="kpi"><span class="eyebrow">Energy today</span><span class="v num">${fmtE(s.todayE)}</span><span class="d">expected ${fmtE(s.todayExp)} by sunset</span></div>
     <div class="kpi"><span class="eyebrow">Specific yield</span><span class="v num">${(sumE(s,7)/s.cap/7).toFixed(2)}</span><span class="d">kWh/kWp/day, 7 days</span></div>
@@ -521,12 +543,12 @@ function vSite(){
     ${fin?`<div class="kpi"><span class="eyebrow">Revenue, 30 days</span><span class="v num">${fmtINR(sumE(s)*s.tariff)}</span><span class="d">₹${s.tariff}/kWh tariff</span></div>`:`<div class="kpi"><span class="eyebrow">CO₂ avoided</span><span class="v num">${(sumE(s)*CO2/1000).toFixed(1)}<small>t</small></span><span class="d">30 days</span></div>`}
     <div class="kpi"><span class="eyebrow">Capacity</span><span class="v num">${fmtCap(s.cap)}</span><span class="d">${s.inv} inverters</span></div>
   </div>
-  <div class="grid g-2">
-    <section class="panel"><div class="panel-head"><h2>Power today</h2><div class="legend"><span><i style="background:var(--accent)"></i>AC power</span><span><i style="background:var(--brand)"></i>Expected</span></div></div>${intraday(s)}</section>
-    <section class="panel"><div class="panel-head"><h2>Daily energy, 30 days</h2><div class="legend"><span><i style="background:var(--accent)"></i>Actual</span><span><i style="background:var(--off-soft)"></i>No data</span><span><i style="background:var(--brand)"></i>Expected</span></div></div>${barLine(pts)}</section>
-  </div>
+  <section class="panel"><div class="panel-head"><div><h2>Live view</h2><span class="sub">The same moment, six ways · updated ${s.lastSeen}</span></div></div>${liveView(s)}${conditions(s)}</section>
+  ${impact(s)}
+  ${sourcesChart(s)}
   <section class="panel"><div class="panel-head"><h2>Inverters</h2><span class="muted">${s.inv} units, ~${Math.round(s.cap/s.inv)} kW each</span></div>
   ${can("view_devices")?`<div class="inv-grid">${inverters(s).map(v=>`<div class="inv ${v.st==="ok"?"":v.st}"><span class="eyebrow">${v.name}</span><b>${fmtP(v.kw)}</b><span class="muted">${fmtE(v.today)} today · ${v.temp}°C</span>${v.al?`<span style="color:var(--${v.st==="bad"?"bad":"warn"})">${esc(v.al.type)}</span>`:""}</div>`).join("")}</div>`:`<p class="hint">Device detail is hidden for ${myRole().name}. Site totals above are still accurate.</p>`}</section>
+  ${can("view_devices")?registers(s):""}
   <div class="grid g-2">
     <section class="panel"><div class="panel-head"><h2>Alarms</h2><span class="muted">${al.filter(a=>a.state==="open").length} open</span></div>${al.length?alarmTable(al,false):`<p class="muted">No alarms in the last 3 days.</p>`}</section>
     <section class="panel"><div class="panel-head"><h2>Site details</h2>${can("edit_sites")?`<button class="btn" data-sfaction="edit">Settings</button>`:""}</div>
@@ -556,12 +578,14 @@ function reportRows(){
     return{k,n:ss.length,cap:ss.reduce((a,s)=>a+s.cap,0),e,x,pr:x?e/x*.8:0,av:ss.reduce((a,s)=>a+availOf(s,r.period),0)/ss.length,rev:ss.reduce((a,s)=>a+sumE(s,r.period)*s.tariff,0)}}).sort((a,b)=>b.e-a.e)};
 }
 function vReports(){
+  const modeSeg=`<div class="seg" role="group" aria-label="Report kind"><button data-rmode="portfolio" aria-pressed="${state.rep.mode==="portfolio"}">Portfolio</button><button data-rmode="site" aria-pressed="${state.rep.mode==="site"}">One site</button></div>`;
+  if(state.rep.mode==="site")return pageHead("Reports","Daily, monthly and interval reports for one site, or any parameters its logger records",modeSeg)+vSiteReport();
   const r=state.rep,{sites,rows}=reportRows(),fin=can("view_financials"),exp=can("export_reports");
   const tot=rows.reduce((a,x)=>({e:a.e+x.e,x:a.x+x.x,cap:a.cap+x.cap,rev:a.rev+x.rev}),{e:0,x:0,cap:0,rev:0});
   const pts=DAYS.slice(30-r.period).map((d,j)=>{const i=30-r.period+j;return{label:dlabel(d),a:sites.reduce((a,s)=>a+(s.daily[i].e||0),0),b:sites.reduce((a,s)=>a+s.daily[i].exp,0)}});
   const shown=r.by==="site"?rows.slice(0,40):rows;
   return pageHead("Reports",`Generation report · ${sites.length} sites · ${dlabel(DAYS[30-r.period])} to ${dlabel(DAYS[29])} 2026`,
-    exp?`<button class="btn" data-action="copycsv">Copy as CSV</button><button class="btn accent" data-action="schedule">Schedule email</button>`:"")+
+    modeSeg+(exp?`<button class="btn" data-action="copycsv">Copy as CSV</button><button class="btn accent" data-action="schedule">Schedule email</button>`:""))+
   `<section class="panel"><div class="filters">
     <label class="field" style="grid-template-columns:auto auto;align-items:center">Scope <select id="rscope"><option value="all">All my sites</option>${visibleSG().map(g=>`<option value="${g.id}" ${r.scope===g.id?"selected":""}>${esc(g.name)}</option>`).join("")}</select></label>
     <div class="seg" role="group" aria-label="Period">${[[7,"7 days"],[14,"14 days"],[30,"30 days"]].map(([k,l])=>`<button data-period="${k}" aria-pressed="${r.period===k}">${l}</button>`).join("")}</div>
@@ -873,10 +897,308 @@ function parseBulk(){
     if(SITES.some(s=>s.name.toLowerCase()===(name||"").toLowerCase()))errs.push("name already used");return{n:n+1,name,customer,c,type,cap:+cap,ac:+ac||Math.round(cap*.85),errs}});
 }
 
+/* ---------- Added after the io.Nest walkthrough: multi-source sites, live views, logger, tickets, renewals, account ---------- */
+const SUN={rise:6.25,set:18.1};
+const fmtKW=kw=>kw==null?"–":Math.abs(kw)>=1000?(kw/1000).toFixed(2)+" MW":Math.abs(kw)>=100?Math.round(kw)+" kW":(+kw).toFixed(1)+" kW";
+const TREES_PER_T=25.6; // trees a year to absorb one tonne of CO₂
+const SRC={solar:["Solar","var(--accent)"],grid:["Grid","var(--brand)"],dg:["Diesel","var(--bad)"],load:["Site load","var(--ink)"]};
+function ext(s){
+  if(s._x)return s._x;const r=mulberry32(s.idx*211+5);
+  const exportOnly=s.type==="Ground-mount"||s.type==="Floating",hasDG=!exportOnly&&r()<.38,hasMeter=exportOnly||r()<.82;
+  const base=exportOnly?0:s.cap*(.45+r()*.9),dgOn=hasDG&&r()<.2,live=!(s.status==="offline"||s.status==="comms");
+  const solar=live?s.nowKW:0,load=exportOnly?0:base*(.85+r()*.3);
+  let grid,dg=0;if(exportOnly)grid=-solar;else if(dgOn){dg=Math.max(load-solar,0);grid=0}else grid=load-solar;
+  const wf=WF[s.region].today,sun=Math.max(0,Math.sin(Math.PI*(NOW_H-6)/12.5));
+  const irr=Math.round(1000*sun*wf*(.92+r()*.1)),cloud=Math.round(clamp((1.05-wf)*160+r()*10,0,100));
+  const temp=+({North:31,West:32,Central:33,South:30,East:29}[s.region]+r()*4).toFixed(1),hum=Math.round(35+r()*45),wind=+(4+r()*14).toFixed(1);
+  const years=Math.max(.1,(TODAY-s.commissioned)/3.156e10),lifetime=s.cap*RY[s.region]*365*years*(s.pr/.8)*.97;
+  const credit=s.daily.filter(d=>d.gap||d.e===0).length+Math.floor(r()*9);
+  const ann=new Date(TODAY.getFullYear(),s.commissioned.getMonth(),s.commissioned.getDate());if(ann<=TODAY)ann.setFullYear(ann.getFullYear()+1);
+  const renew=new Date(ann.getTime()+credit*864e5),served=Math.round((TODAY-new Date(ann.getTime()-365*864e5))/864e5);
+  const fee=Math.round((12000+s.cap*140)/500)*500,dgTariff=+(21+r()*7).toFixed(2);
+  return s._x={exportOnly,hasDG,hasMeter,base,dgOn,solar,load,grid,dg,irr,cloud,temp,hum,wind,lifetime,credit,renew,served,fee,dgTariff,paid:r()<.7,expNow:live||s.status==="offline"?s.cap*.86*sun*wf:0};
+}
+const solarShare=x=>x.exportOnly?null:x.load>0?clamp(x.solar/x.load,0,1):0;
+const daysTo=d=>Math.round((d-TODAY)/864e5);
+const dfmt=d=>d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+
+/* Plain-language briefings, like io.Nest's assistant bubble */
+function greeting(){return NOW_H<12?"Good morning":NOW_H<17?"Good afternoon":"Good evening"}
+function briefing(lines,link){return`<div class="brief" role="status"><span class="brief-ic" aria-hidden="true">${svgI("spark",20)}</span><div>${lines.map(l=>`<p>${l}</p>`).join("")}${link||""}</div></div>`}
+function overviewBrief(sc){
+  const rep=sc.filter(s=>s.status!=="comms").length,nowKW=sc.reduce((a,s)=>a+s.nowKW,0),exp=sc.reduce((a,s)=>a+ext(s).expNow,0),tE=sc.reduce((a,s)=>a+(s.todayE||0),0);
+  const val=sc.reduce((a,s)=>a+(s.todayE||0)*s.tariff,0),crit=ALARMS.filter(a=>a.state==="open"&&a.sev==="critical"&&sc.some(s=>s.id===a.site));
+  const off=sc.filter(s=>s.status==="offline"||s.status==="comms");
+  const l=[`<b>${greeting()}, ${esc(me().name.split(" ")[0])}.</b> ${rep===sc.length?`All ${sc.length} of your sites are reporting.`:`${rep} of your ${sc.length} sites are reporting.`}`,
+    `Together they are generating <b>${fmtP(nowKW)}</b> right now, ${pct(nowKW/(exp||1))} of what today's weather allows. Today they have made <b>${fmtE(tE)}</b>${can("view_financials")?` — about <b>${fmtINR(val)}</b> of electricity`:""}.`];
+  l.push(crit.length?`<b>${crit.length} critical alarm${crit.length>1?"s":""}</b> need attention, the newest at ${esc(siteById(crit[0].site).name)}: ${esc(crit[0].type.toLowerCase())}.${off.length?` ${off.length} sites are offline or not sending data.`:""}`:"Nothing needs your attention — every site is sending data as expected.");
+  return briefing(l,crit.length?`<button class="link" data-nav="alarms">Have a look</button>`:"");
+}
+function siteBrief(s){
+  const x=ext(s),sh=solarShare(x);let l=[];
+  if(s.status==="comms")l.push(`<b>${esc(s.name)}</b> has not sent data since ${s.lastSeen}. The datalogger or its internet link is the usual cause; the figures below are from the last reading.`);
+  else if(s.status==="offline")l.push(`<b>${esc(s.name)}</b> is not generating, although the weather allows about ${fmtKW(x.expNow)}. ${ALARMS.some(a=>a.site===s.id&&a.state==="open")?"An alarm is open and the O&M team has been told.":""}`);
+  else l.push(`<b>${esc(s.name)}</b> is generating <b>${fmtKW(s.nowKW)}</b>, ${pct(s.nowKW/(x.expNow||1))} of what today's weather allows.${sh!=null?` Solar is covering <b>${Math.round(sh*100)}%</b> of the site's load${x.dgOn?", and the diesel set is running because the grid is down":""}.`:" All of it is exported to the grid."}`);
+  l.push(`Conditions at ${s.city}: ${x.temp}°C with ${x.cloud}% cloud, ${x.irr} W/m² of sunlight.`);
+  return briefing(l);
+}
+
+/* Day profile per source, 15-minute steps */
+function dayProfile(s){
+  const x=ext(s),wf=WF[s.region].today,rr=mulberry32(s.idx*97+3),live=!(s.status==="offline"||s.status==="comms"),out=[];
+  for(let t=0;t<=NOW_H+1e-9;t+=.25){const u=(t-6)/12.5;const ex=u<0||u>1?0:s.cap*.86*Math.sin(Math.PI*u)*wf;const solar=live?ex*(s.pr/.8)*(.93+rr()*.1):0;
+    const ci=t>=8.5&&t<=19?1:.55,load=x.exportOnly?0:x.base*ci*(.9+rr()*.2);
+    const dg=x.hasDG&&((t>=7&&t<7.75)||(x.dgOn&&t>=13))?Math.max(load-solar,0):0,grid=x.exportOnly?-solar:dg>0?0:load-solar;out.push({t,ex,solar,grid,dg,load})}
+  return out;
+}
+function energyHistory(s,range){
+  const x=ext(s),rr=mulberry32(s.idx*53+range.length);
+  const day=(e,ex,label,gap)=>{const load=x.exportOnly?0:x.base*(10.5+.55*13.5)*(.9+rr()*.2),dg=x.hasDG?load*(.02+rr()*.1):0;
+    return{label,solar:e||0,exp:ex,gap,load,dg,grid:x.exportOnly?-(e||0):Math.max(load-(e||0)-dg,0)}};
+  if(range==="week")return s.daily.slice(23).map((d,i)=>day(d.e,d.exp,DAYS[23+i].toLocaleDateString("en-IN",{weekday:"short"}),d.gap));
+  if(range==="month")return s.daily.map((d,i)=>day(d.e,d.exp,dlabel(DAYS[i]),d.gap));
+  const SEAS=[.86,.95,1.06,1.12,1.1,.92,.8,.82,.92,.97,.9,.83];
+  return[...Array(12)].map((_,k)=>{const m=new Date(TODAY.getFullYear(),TODAY.getMonth()-11+k,1),dim=k===11?TODAY.getDate():new Date(m.getFullYear(),m.getMonth()+1,0).getDate();
+    const ex=s.cap*RY[s.region]*SEAS[m.getMonth()]*dim,before=m<new Date(s.commissioned.getFullYear(),s.commissioned.getMonth(),1);
+    const r=day(before?0:ex*(s.pr/.8)*(.95+rr()*.08),ex,m.toLocaleDateString("en-IN",{month:"short"}),before);r.load*=dim;r.dg*=dim;r.grid=x.exportOnly?-r.solar:Math.max(r.load-r.solar-r.dg,0);return r});
+}
+function sourcesChart(s){
+  const x=ext(s),rg=state.chartRange||"day",hide=state.hideSrc||{};const srcs=["solar",...(x.hasMeter?["grid"]:[]),...(x.hasDG?["dg"]:[])];
+  const W=760,H=250,L=64,Rr=12,T=14,B=28,iw=W-L-Rr,ih=H-T-B;let g="",max,rows,cols;
+  if(rg==="day"){
+    rows=dayProfile(s);max=niceMax(Math.max(s.cap*.9,...rows.map(p=>Math.max(p.load,Math.abs(p.grid),p.dg))));
+    const X=t=>L+t/24*iw,Y=v=>T+ih-Math.max(v,0)/max*ih;
+    for(let i=0;i<=4;i++){const y=T+ih-ih*i/4;g+=`<line x1="${L}" x2="${W-Rr}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${y+3}" text-anchor="end">${fmtP(max*i/4)}</text>`}
+    for(let t=0;t<=24;t+=3)g+=`<text x="${X(t)}" y="${H-8}" text-anchor="middle">${String(t%24).padStart(2,"0")}:00</text>`;
+    g+=`<path d="${rows.map((p,i)=>`${i?"L":"M"}${X(p.t).toFixed(1)},${Y(p.ex).toFixed(1)}`).join("")}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    const ser={solar:p=>p.solar,grid:p=>Math.abs(p.grid),dg:p=>p.dg,load:p=>p.load};
+    [...srcs,...(x.exportOnly?[]:["load"])].filter(k=>!hide[k]).forEach(k=>{const d=rows.map((p,i)=>`${i?"L":"M"}${X(p.t).toFixed(1)},${Y(ser[k](p)).toFixed(1)}`).join("");
+      g+=k==="solar"?`<path d="${d}L${X(rows[rows.length-1].t)},${T+ih}L${X(rows[0].t)},${T+ih}Z" fill="var(--accent)" opacity=".18"/>`:"";
+      g+=`<path d="${d}" fill="none" stroke="${SRC[k][1]}" stroke-width="${k==="load"?1.6:2.2}" ${k==="load"?'stroke-dasharray="1 3" stroke-linecap="round"':""}/>`});
+    cols=["Time",...srcs.map(k=>SRC[k][0]+" kW"),...(x.exportOnly?[]:["Site load kW"])];
+    rows=rows.filter((_,i)=>i%2===0).map(p=>[`${String(Math.floor(p.t)).padStart(2,"0")}:${String(Math.round(p.t%1*60)).padStart(2,"0")}`,...srcs.map(k=>(k==="grid"?p.grid:p[k]).toFixed(1)),...(x.exportOnly?[]:[p.load.toFixed(1)])]);
+  }else{
+    const pts=energyHistory(s,rg);const vis=srcs.filter(k=>!hide[k]);
+    max=niceMax(Math.max(...pts.map(p=>Math.max(vis.reduce((a,k)=>a+Math.abs(p[k]),0),p.load,p.exp))));const bw=iw/pts.length;
+    for(let i=0;i<=4;i++){const y=T+ih-ih*i/4;g+=`<line x1="${L}" x2="${W-Rr}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${y+3}" text-anchor="end">${fmtE(max*i/4)}</text>`}
+    pts.forEach((p,i)=>{let y0=T+ih;const xx=L+i*bw+bw*.16,w=bw*.68;vis.forEach(k=>{const h=Math.abs(p[k])/max*ih;y0-=h;g+=`<rect x="${xx.toFixed(1)}" y="${y0.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${p.gap&&k==="solar"?"var(--off-soft)":SRC[k][1]}" opacity="${k==="solar"?1:.8}"><title>${p.label} · ${SRC[k][0]} ${fmtE(Math.abs(p[k]))}</title></rect>`});
+      const st=Math.ceil(pts.length/10);if(i%st===0)g+=`<text x="${(L+i*bw+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle">${p.label}</text>`});
+    g+=`<path d="${pts.map((p,i)=>`${i?"L":"M"}${(L+i*bw+bw/2).toFixed(1)},${(T+ih-p.exp/max*ih).toFixed(1)}`).join("")}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    cols=[rg==="year"?"Month":"Day",...srcs.map(k=>SRC[k][0]+(k==="grid"&&x.exportOnly?" export":"")+" kWh"),"Solar expected kWh"];
+    rows=pts.map(p=>[p.label,...srcs.map(k=>Math.round(Math.abs(p[k])).toLocaleString("en-IN")),Math.round(p.exp).toLocaleString("en-IN")]);
+  }
+  const title={day:"Power today, by source",week:"Energy per day, last 7 days",month:"Energy per day, last 30 days",year:"Energy per month, last 12 months"}[rg];
+  const key=[...srcs,...(rg==="day"&&!x.exportOnly?["load"]:[])].map(k=>`<button class="key" data-src="${k}" aria-pressed="${!hide[k]}"><i style="background:${SRC[k][1]}"></i>${SRC[k][0]}${k==="grid"&&x.exportOnly?" export":""}</button>`).join("")+`<span class="key static"><i style="background:var(--muted)"></i>Solar expected</span>`;
+  return`<section class="panel"><div class="panel-head"><div><h2>${title}</h2><span class="sub">Tap a source in the key to hide or show it</span></div><div class="seg" role="group" aria-label="Time range">${[["day","Day"],["week","Week"],["month","Month"],["year","Year"]].map(([k,l])=>`<button data-crange="${k}" aria-pressed="${rg===k}">${l}</button>`).join("")}</div></div>
+    <div class="keys">${key}</div><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}">${g}</svg>
+    <button class="link" data-action="numbers" aria-expanded="${!!state.showNums}">${state.showNums?"Hide the numbers":"Show the numbers"}</button>
+    ${state.showNums?`<div class="tbl-wrap" style="max-height:320px;margin-top:8px"><table><thead><tr>${cols.map((c,i)=>`<th class="${i?"r":""}">${c}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((v,i)=>`<td class="${i?"r num":""}">${v}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:""}</section>`;
+}
+
+/* Six live views of the same moment */
+const DIAGS=[["plant","Plant","The equipment, drawn live"],["flow","Energy flow","Sources feeding the site, animated"],["gauges","Gauges","One dial per source on a shared scale"],["sld","Single-line","Electrical schematic with breakers"],["share","Contribution","Who is supplying the site right now"],["weather","Weather","Sunlight and site conditions"]];
+function liveView(s){
+  const x=ext(s),v=state.diag||"plant",W=760,H=330;const gridLbl=x.grid>0.5?"Importing":x.grid<-0.5?"Exporting":"Idle";
+  const val=(X,Y,lab,kw,sub,col,anchor="start")=>`<text x="${X}" y="${Y}" text-anchor="${anchor}" class="dg-lab" style="fill:${col}">${lab}</text><text x="${X}" y="${Y+24}" text-anchor="${anchor}" class="dg-val">${kw}</text>${sub?`<text x="${X}" y="${Y+42}" text-anchor="${anchor}" class="dg-sub">${sub}</text>`:""}`;
+  const solarTxt=s.status==="comms"?"–":fmtKW(x.solar),dgTxt=x.hasDG?(x.dg>0?fmtKW(x.dg):"Standby"):"none";
+  let g="";
+  if(v==="plant"){
+    for(let i=0;i<3;i++)g+=`<g transform="translate(${40+i*14},${30+i*22})"><path d="M0 26 L22 0 H150 L128 26Z" fill="var(--brand-soft)" stroke="var(--brand)"/><path d="M43 0 L21 26 M65 0 L43 26 M86 0 L64 26 M108 0 L86 26 M129 0 L107 26" stroke="var(--brand)" stroke-width=".8"/></g>`;
+    g+=`<text x="110" y="128" text-anchor="middle" class="dg-sub">${fmtCap(s.cap)} array</text>`;
+    const ni=Math.min(s.inv,6);for(let i=0;i<ni;i++)g+=`<rect x="${70+i*26}" y="146" width="20" height="26" rx="3" fill="var(--surface-2)" stroke="var(--muted)"/><rect x="${73+i*26}" y="150" width="14" height="6" fill="${s.status==="offline"?"var(--bad)":"var(--ok)"}"/>`;
+    g+=`<text x="${70+ni*13}" y="190" text-anchor="middle" class="dg-sub">${s.inv} inverter${s.inv>1?"s":""}${s.inv>6?" (6 shown)":""}</text><line x1="${70+ni*13}" y1="196" x2="${70+ni*13}" y2="230" stroke="var(--muted)" stroke-width="2"/>`;
+    g+=`<line x1="60" y1="232" x2="700" y2="232" stroke="var(--muted)" stroke-width="6" stroke-linecap="round"/><text x="60" y="252" class="dg-sub">LT BUSBAR</text>`;
+    if(x.hasMeter)g+=`<g transform="translate(372,30)" stroke="var(--brand)" fill="none" stroke-width="2"><path d="M0 120 L18 0 L36 120 M5 90 H31 M9 60 H27 M13 30 H23 M-12 12 H48"/></g><text x="390" y="168" text-anchor="middle" class="dg-sub">${gridLbl.toUpperCase()}</text><line x1="390" y1="174" x2="390" y2="230" stroke="var(--brand)" stroke-width="2" ${Math.abs(x.grid)>.5?'class="flow-line'+(x.grid<0?" rev":"")+'"':""}/>`;
+    if(x.hasDG)g+=`<rect x="560" y="70" width="110" height="60" rx="6" fill="var(--surface-2)" stroke="var(--muted)"/><circle cx="640" cy="100" r="16" fill="none" stroke="var(--muted)"/><path d="M572 82v36M582 82v36M592 82v36" stroke="var(--muted)"/><text x="615" y="146" text-anchor="middle" class="dg-sub">${x.dg>0?"RUNNING":"STANDBY"}</text><line x1="615" y1="152" x2="615" y2="230" stroke="var(--bad)" stroke-width="2" ${x.dg>0?'class="flow-line"':""}/>`;
+    if(!x.exportOnly)g+=`<line x1="390" y1="234" x2="390" y2="262" stroke="var(--muted)" stroke-width="2" class="flow-line"/><path d="M330 268 L390 252 L450 268Z" fill="var(--off-soft)" stroke="var(--muted)"/><rect x="336" y="268" width="108" height="56" fill="var(--surface-2)" stroke="var(--muted)"/>${[0,1,2,3].map(c=>[0,1].map(r2=>`<rect x="${346+c*24}" y="${276+r2*20}" width="14" height="10" fill="var(--accent)" opacity="${.5+((c+r2)%2)*.4}"/>`).join("")).join("")}`;
+    g+=val(180,262,"SOLAR",solarTxt,`${fmtE(s.todayE)} today`,"var(--accent-ink)");
+    if(x.hasMeter)g+=val(420,90,"GRID",fmtKW(Math.abs(x.grid)),gridLbl.toLowerCase(),"var(--brand)");
+    if(x.hasDG)g+=val(628,168,"DIESEL",dgTxt,"","var(--bad)");
+    if(!x.exportOnly)g+=val(460,282,"SITE LOAD",fmtKW(x.load),x.hasMeter||x.hasDG?"across all sources":"no grid meter","var(--ink)");
+  }else if(v==="flow"||v==="sld"){
+    const nodes=[["solar","SOLAR",x.solar,120,60,solarTxt],...(x.hasMeter?[["grid","GRID",Math.abs(x.grid),380,60,fmtKW(Math.abs(x.grid))]]:[]),...(x.hasDG?[["dg","DIESEL",x.dg,640,60,dgTxt]]:[])];
+    const busY=v==="flow"?175:170;
+    if(v==="flow"){g+=`<circle cx="380" cy="${busY}" r="26" fill="var(--surface-2)" stroke="var(--muted)"/><text x="380" y="${busY+4}" text-anchor="middle" class="dg-sub">BUS</text>`;
+      nodes.forEach(([k,l,kw,X,Y,t])=>{const on=kw>.5,rev=k==="grid"&&x.grid<0;g+=`<path d="M${X} ${Y+40} C ${X} ${busY-40}, 380 ${busY-50}, 380 ${busY-26}" fill="none" stroke="${SRC[k][1]}" stroke-width="${on?3:1.5}" opacity="${on?1:.35}" ${on?`class="flow-line${rev?" rev":""}"`:""}/><circle cx="${X}" cy="${Y+14}" r="26" fill="var(--surface)" stroke="${SRC[k][1]}" stroke-width="2"/><text x="${X}" y="${Y+18}" text-anchor="middle" class="dg-lab" style="fill:${SRC[k][1]}">${l}</text><text x="${X}" y="${Y-22}" text-anchor="middle" class="dg-val">${t}</text>`});
+      if(!x.exportOnly)g+=`<line x1="380" y1="${busY+26}" x2="380" y2="262" stroke="var(--ink)" stroke-width="3" class="flow-line"/><rect x="330" y="262" width="100" height="44" rx="8" fill="var(--surface)" stroke="var(--ink)"/><text x="380" y="282" text-anchor="middle" class="dg-lab">SITE LOAD</text><text x="380" y="300" text-anchor="middle" class="dg-sub">${fmtKW(x.load)}</text>`;
+    }else{g+=`<line x1="80" y1="${busY}" x2="680" y2="${busY}" stroke="var(--ink)" stroke-width="5"/><text x="680" y="${busY+20}" text-anchor="end" class="dg-sub">AC BUS · ${fmtKW(x.exportOnly?x.solar:x.load)}</text>`;
+      nodes.forEach(([k,l,kw,X,Y,t])=>{const closed=kw>.5;g+=`<rect x="${X-40}" y="${Y-10}" width="80" height="34" rx="6" fill="var(--surface)" stroke="${SRC[k][1]}" stroke-width="2"/><text x="${X}" y="${Y+5}" text-anchor="middle" class="dg-lab" style="fill:${SRC[k][1]}">${l}</text><text x="${X}" y="${Y+19}" text-anchor="middle" class="dg-sub">${t}</text>
+        <line x1="${X}" y1="${Y+24}" x2="${X}" y2="${busY-46}" stroke="var(--ink)" stroke-width="2"/><circle cx="${X}" cy="${busY-44}" r="3" fill="var(--ink)"/>${closed?`<line x1="${X}" y1="${busY-44}" x2="${X}" y2="${busY-20}" stroke="var(--ink)" stroke-width="2.5"/>`:`<line x1="${X}" y1="${busY-44}" x2="${X+16}" y2="${busY-24}" stroke="var(--ink)" stroke-width="2.5"/>`}<circle cx="${X}" cy="${busY-20}" r="3" fill="var(--ink)"/><line x1="${X}" y1="${busY-20}" x2="${X}" y2="${busY}" stroke="var(--ink)" stroke-width="2"/><text x="${X+22}" y="${busY-28}" class="dg-sub">${closed?"closed":"open"}</text>`});
+      g+=x.exportOnly?`<text x="380" y="${busY+50}" text-anchor="middle" class="dg-sub">All output exported through the grid connection</text>`:`<line x1="380" y1="${busY}" x2="380" y2="250" stroke="var(--ink)" stroke-width="2"/><path d="M370 250 h20 l-10 14z" fill="var(--ink)"/><text x="380" y="284" text-anchor="middle" class="dg-lab">SITE LOAD</text><text x="380" y="302" text-anchor="middle" class="dg-sub">${fmtKW(x.load)}</text>`;}
+  }else if(v==="gauges"){
+    const items=[["solar",x.solar,"generating"],...(x.hasMeter?[["grid",Math.abs(x.grid),gridLbl.toLowerCase()]]:[]),...(x.hasDG?[["dg",x.dg,x.dg>0?"running":"standby"]]:[]),...(x.exportOnly?[]:[["load",x.load,"calculated"]])];
+    const mx=niceMax(Math.max(...items.map(i=>i[1]),1)),n=items.length,sp=W/n;
+    items.forEach(([k,kw,sub],i)=>{const cx=sp*i+sp/2,cy=190,r=Math.min(80,sp/2-20),a=Math.PI*(1-kw/mx),nx=cx+Math.cos(a)*(r-8),ny=cy-Math.sin(a)*(r-8);
+      g+=`<path d="M${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="var(--line)" stroke-width="12" stroke-linecap="round"/>`+(kw>0?`<path d="M${cx-r} ${cy} A ${r} ${r} 0 0 1 ${(cx+Math.cos(a)*r).toFixed(1)} ${(cy-Math.sin(a)*r).toFixed(1)}" fill="none" stroke="${SRC[k][1]}" stroke-width="12" stroke-linecap="round"/>`:"")+
+      `<line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="var(--ink)" stroke-width="2.5"/><circle cx="${cx}" cy="${cy}" r="5" fill="var(--ink)"/><text x="${cx}" y="${cy+30}" text-anchor="middle" class="dg-val">${fmtKW(kw)}</text><text x="${cx}" y="${cy+48}" text-anchor="middle" class="dg-lab" style="fill:${SRC[k][1]}">${SRC[k][0].toUpperCase()}</text><text x="${cx}" y="${cy+64}" text-anchor="middle" class="dg-sub">${sub}</text>`});
+    g+=`<text x="380" y="40" text-anchor="middle" class="dg-sub">Every dial shares one scale, 0 to ${fmtP(mx)}, so a needle means the same on all of them</text>`;
+  }else if(v==="share"){
+    if(x.exportOnly){g+=`<text x="380" y="150" text-anchor="middle" class="dg-val">${fmtKW(x.solar)} exported</text><text x="380" y="176" text-anchor="middle" class="dg-sub">This site has no local load; everything goes to the grid.</text>`}
+    else{const parts=[["solar",Math.min(x.solar,x.load)],["grid",Math.max(x.grid,0)],["dg",x.dg]].filter(p=>p[1]>0),tot=parts.reduce((a,p)=>a+p[1],0)||1;let x0=60;
+      g+=`<text x="60" y="70" class="dg-lab">WHO IS SUPPLYING THE SITE RIGHT NOW · ${fmtKW(x.load)}</text>`;
+      parts.forEach(([k,kw])=>{const w=640*kw/tot;g+=`<rect x="${x0}" y="90" width="${w}" height="56" fill="${SRC[k][1]}"/>${w>60?`<text x="${x0+10}" y="124" class="dg-lab" style="fill:var(--surface)">${SRC[k][0].toUpperCase()} ${Math.round(kw/tot*100)}%</text>`:""}`;x0+=w});
+      [["solar",x.solar,`${fmtE(s.todayE)} today`],["grid",x.grid,!x.hasMeter?"no grid meter":x.grid<0?"exporting":"importing"],["dg",x.dg,x.hasDG?(x.dg>0?"running":"standby"):"no diesel set"]].forEach(([k,kw,sub],i)=>{g+=val(60+i*230,200,SRC[k][0].toUpperCase(),(k==="dg"&&!x.hasDG)||(k==="grid"&&!x.hasMeter)?"–":fmtKW(Math.abs(kw)),sub,SRC[k][1])});}
+  }else{
+    const r=90,cx=190,cy=180,f=x.irr/1100,a=Math.PI*(1-f);
+    g+=`<path d="M${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="var(--line)" stroke-width="16" stroke-linecap="round"/><path d="M${cx-r} ${cy} A ${r} ${r} 0 0 1 ${(cx+Math.cos(a)*r).toFixed(1)} ${(cy-Math.sin(a)*r).toFixed(1)}" fill="none" stroke="var(--accent)" stroke-width="16" stroke-linecap="round"/><text x="${cx}" y="${cy-10}" text-anchor="middle" class="dg-big">${x.irr}</text><text x="${cx}" y="${cy+14}" text-anchor="middle" class="dg-sub">W/m² sunlight</text>`;
+    [["Generating",fmtKW(x.solar)],["Expected",fmtKW(x.expNow)],["Ambient",x.temp+" °C"],["Cloud cover",x.cloud+"%"],["Humidity",x.hum+"%"],["Wind",x.wind+" km/h"]].forEach(([l,t],i)=>{g+=`<text x="${380+(i%2)*180}" y="${80+Math.floor(i/2)*70}" class="dg-sub">${l}</text><text x="${380+(i%2)*180}" y="${104+Math.floor(i/2)*70}" class="dg-val">${t}</text>`});
+  }
+  return`<div class="seg seg-wide" role="group" aria-label="Diagram style">${DIAGS.map(([k,l,d])=>`<button data-diag="${k}" aria-pressed="${v===k}" title="${d}">${l}</button>`).join("")}</div>
+    <svg class="chart diag" viewBox="0 0 ${W} ${H}" role="img" aria-label="${DIAGS.find(d=>d[0]===v)[2]}: solar ${solarTxt}${x.hasMeter?`, grid ${fmtKW(Math.abs(x.grid))} ${gridLbl.toLowerCase()}`:""}${x.hasDG?`, diesel ${dgTxt}`:""}${x.exportOnly?"":`, site load ${fmtKW(x.load)}`}">${g}</svg>
+    ${!x.hasMeter?`<p class="hint">Site load is estimated because this site has no grid meter. Adding one shows total consumption and the solar share of it.</p>`:""}`;
+}
+function conditions(s){
+  const x=ext(s),diff=x.expNow>1?s.nowKW/x.expNow-1:null;
+  return`<div class="cond"><span class="eyebrow">Site conditions <span class="sub" style="text-transform:none;letter-spacing:0">from weather forecast · this site has no sensors</span></span>
+    <div class="cond-row">${[["Sunlight",x.irr+" W/m²"],["Ambient",x.temp+" °C"],["Humidity",x.hum+"%"],["Wind",x.wind+" km/h"],["Cloud",x.cloud+"%"]].map(([l,v])=>`<div><span class="sub">${l} <span class="est">est</span></span><b class="num">${v}</b></div>`).join("")}</div>
+    <div class="vs ${diff==null?"":diff<-.12?"down":"up"}"><b>${diff==null?"Too little sun right now to compare":diff<-.12?`Running ${pct(-diff)} below what the weather allows`:`In line with the weather (${diff>=0?"+":"−"}${pct(Math.abs(diff))})`}</b><span class="sub">Expected ${fmtKW(x.expNow)} · actual ${s.status==="comms"?"–":fmtKW(s.nowKW)} · ${fmtCap(s.cap)} · forecast from Open-Meteo, only coordinates are sent</span></div></div>`;
+}
+function impact(s){
+  const x=ext(s),fin=can("view_financials"),sh=solarShare(x),co2T=(s.todayE||0)*CO2,co2L=x.lifetime*CO2/1000,rate=x.hasDG?`₹${s.tariff} grid, ₹${x.dgTariff} diesel`:`₹${s.tariff}/kWh`;
+  const peak=Math.max(...dayProfile(s).map(p=>p.solar));
+  return`<div class="kpis kpis-4">
+    ${sh!=null?`<div class="kpi"><span class="eyebrow">Running on solar</span><span class="v num">${Math.round(sh*100)}<small>%</small></span><span class="d">of site load right now</span></div>`:`<div class="kpi"><span class="eyebrow">Exporting</span><span class="v num">${fmtKW(x.solar)}</span><span class="d">to the grid</span></div>`}
+    ${fin?`<div class="kpi"><span class="eyebrow">Saved today</span><span class="v num">${fmtINR((s.todayE||0)*(x.dgOn?x.dgTariff:s.tariff))}</span><span class="d">at ${rate}</span></div><div class="kpi"><span class="eyebrow">Saved, lifetime</span><span class="v num">${fmtINR(x.lifetime*s.tariff)}</span><span class="d">since ${s.commissioned.getFullYear()}</span></div>`:""}
+    <div class="kpi"><span class="eyebrow">Peak today</span><span class="v num">${fmtKW(peak)}</span><span class="d">highest output since midnight</span></div>
+    <div class="kpi"><span class="eyebrow">CO₂ avoided today</span><span class="v num">${Math.round(co2T)}<small>kg</small></span><span class="d">vs grid or diesel</span></div>
+    <div class="kpi"><span class="eyebrow">CO₂ avoided, lifetime</span><span class="v num">${co2L.toFixed(co2L<10?1:0)}<small>t</small></span><span class="d">same as ${Math.round(co2L*TREES_PER_T).toLocaleString("en-IN")} trees growing for a year</span></div>
+  </div>`;
+}
+function subscriptionCard(s){
+  const x=ext(s),d=daysTo(x.renew);
+  return`<div class="sub-card ${d<=20?"due":""}"><span class="eyebrow">${d<=20?"Renewal due soon":"Monitoring subscription active"}</span><span>Renews on <b>${dfmt(x.renew)}</b> — ${d} days to go.${can("view_financials")?` Annual fee ${fmtINR(x.fee)}.`:""}</span><span class="filters"><span class="tag">${x.served} days served</span>${x.credit?`<span class="tag ok">+${x.credit} days added for time with no data</span>`:""}</span></div>`;
+}
+
+/* Raw logger registers, for engineers */
+function registers(s){
+  const x=ext(s),rr=mulberry32(s.idx*17+1),live=!(s.status==="offline"||s.status==="comms"),f=v=>(+v).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const V=()=>live?228+rr()*14:0,devs=[];
+  inverters(s).slice(0,6).forEach((v,i)=>{const kw=v.kw,vdc=live&&kw>0?560+rr()*90:0;devs.push({name:v.name,addr:i+1,kind:"Inverter",regs:[["Activ_pow",kw],["E_Today",v.today],["E_Total",x.lifetime/s.inv*(.95+rr()*.1)],["PV1_V",vdc],["PV1_C",vdc?kw*500/vdc/2:0],["PV2_V",vdc?vdc-4+rr()*8:0],["PV2_C",vdc?kw*500/vdc/2:0],["Volt_R",V()],["Volt_Y",V()],["Volt_B",V()],["Curr_R",kw*1000/3/230],["Freq",live?49.9+rr()*.2:0],["Inv_State",live?(kw>0?512:0):0],["Fault_Code",v.st==="bad"?3+Math.floor(rr()*40):0],["Temp_C",v.temp],["Load_Percnt",v.rated?kw/v.rated*100:0]]})});
+  const meter=(name,addr,kw,imp,exp)=>({name,addr,kind:"Meter",regs:[["Volt_R",V()],["Volt_Y",V()],["Volt_B",V()],["Curr_R",Math.abs(kw)*1000/3/230],["Curr_Y",Math.abs(kw)*1000/3/231],["Curr_B",Math.abs(kw)*1000/3/229],["Total_Pow",kw],["Avg_PF",kw?(.86+rr()*.12):1],["Freq",live?49.9+rr()*.2:0],["Imp_KWh",imp],["Exp_KWh",exp],["Total_KWh",imp+exp]]});
+  if(x.hasMeter)devs.push(meter("Grid_MFM",11,x.grid,x.exportOnly?1200:x.base*7200,x.exportOnly?x.lifetime:x.lifetime*.04));
+  if(x.hasDG)devs.push(meter("DG_MFM",21,x.dg,x.base*900*(1+rr()),0));
+  return`<section class="panel"><div class="panel-head"><div><h2>Straight from the logger</h2><span class="sub">Every register each device reports, unprocessed</span></div><span class="chip ${live?"s-online":"s-offline"}">${live?"Connected":"Not connected"}</span></div>
+    <p class="sub" style="margin:0 0 10px">Recorded ${s.lastSeen} · checked 26 s ago${s.inv>6?` · showing 6 of ${s.inv} inverters`:""}</p>
+    <div class="regs">${devs.map(d=>`<details class="reg" ${d===devs[0]?"open":""}><summary><b>${d.name}</b> <span class="sub">#${d.addr} · ${d.kind}</span><span class="sub" style="margin-left:auto">02/10/26 14:28</span></summary><dl>${d.regs.map(([k,v])=>`<dt>${k}</dt><dd class="num">${f(v)}</dd>`).join("")}</dl></details>`).join("")}</div></section>`;
+}
+
+/* Support tickets with automatic checks */
+const TICKET_CATS=["Site is not showing data","Generation looks low","A figure is missing or looks wrong","An inverter looks faulty","Problem with reports or downloads","Sign-in or access problem","Something else"];
+const TICKETS=[];
+(function(){const r=mulberry32(77);const by=USERS.filter(u=>u.persona);[["S-1004",1,"Output dropped after cleaning","answered"],["S-1019",3,"INV-02 shows red light","open"],["S-1033",0,"No data since morning","open"],[null,5,"Can't see Pune sites","resolved"],["S-1050",4,"Monthly PDF missing diesel column","resolved"],["S-1071",1,"Low generation this week","open"]].forEach(([sid,c,sub,st],i)=>{
+  const u=by[[5,4,2,5,3,1][i]],ids=[...accessibleSiteIds(u)],s=sid&&ids.length?siteById(ids[(i*7)%ids.length]):null;
+  TICKETS.push({id:"T-"+(1041+i),site:s&&s.id,cat:TICKET_CATS[c],subject:sub,status:st,by:u.id,when:`${1+Math.floor(r()*9)} ${i<2?"h":"d"} ago`,msgs:[{who:u.name,text:"Please check, this started today.",when:"opened"},{who:"Automatic check",auto:true,text:s?autoCheck(s,TICKET_CATS[c]):"Your account and group access look correct. Sent to an administrator.",when:"just after"},...(st==="resolved"?[{who:"Divya Nair",text:"Fixed and confirmed with the site team. Closing this.",when:"later"}]:[])]})})})();
+function autoCheck(s,cat){
+  const x=ext(s),al=ALARMS.filter(a=>a.site===s.id&&a.state!=="cleared");
+  if(s.status==="comms")return`The datalogger at ${s.name} last reported ${s.lastSeen}. This is usually the internet link or power to the logger. An engineer has been asked to check it.`;
+  if(s.status==="offline")return`${s.name} is producing nothing although the weather allows about ${fmtKW(x.expNow)}. ${al.length?`Open alarm: ${al[0].type} on ${al[0].device}.`:""} Escalated to the O&M team.`;
+  if(cat.includes("low")||cat.includes("faulty")){const bad=inverters(s).filter(v=>v.st!=="ok");return bad.length?`${bad.length} inverter${bad.length>1?"s are":" is"} below the others: ${bad.map(v=>v.name).join(", ")}. ${al[0]?al[0].type+".":""} Escalated to the O&M team.`:`Output is ${pct(s.nowKW/(x.expNow||1))} of what today's weather allows and every inverter is within 10% of the others. Cloud cover is ${x.cloud}%, which explains most of the dip. If that does not match what you see, reply and we will send an engineer.`}
+  return`${s.name} is reporting normally: last reading ${s.lastSeen}, ${fmtKW(s.nowKW)} now. Passed to the support team for a closer look.`;
+}
+const TSTATUS={open:["Open","s-degraded"],answered:["Answered","s-online"],resolved:["Resolved","plain"]};
+function vSupport(){
+  const sc=scope(),ids=new Set(sc.map(s=>s.id)),staff=can("handle_tickets");
+  const mine=TICKETS.filter(t=>staff?(!t.site||ids.has(t.site)):(t.by===me().id||(USERS.find(u=>u.id===t.by)||{}).org===me().org&&(!t.site||ids.has(t.site))));
+  const list=mine.filter(t=>state.tickF==="all"||(state.tickF==="resolved"?t.status==="resolved":t.status!=="resolved"));
+  return pageHead("Support",staff?"Tickets from every site in your access. Automatic checks run first, so you only see what they could not resolve.":"Raise a problem and track the answer. We check your site automatically first, so most questions are answered straight away.")+
+  `<div class="grid g-2"><section class="panel"><div class="panel-head"><h2>Get help</h2></div><form id="ticketform" style="display:grid;gap:12px">
+    <div class="field"><label for="tcat">What is the problem about?</label><select id="tcat">${TICKET_CATS.map(c=>`<option>${c}</option>`).join("")}</select></div>
+    <div class="field"><label for="tsite">Which site?</label><select id="tsite"><option value="">Not about a specific site</option>${sc.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></div>
+    <div class="field"><label for="tsub">Subject</label><input id="tsub" placeholder="Short summary" maxlength="80"></div>
+    <div class="field"><label for="tbody">What is happening?</label><textarea id="tbody" rows="4" placeholder="Tell us what you are seeing and when it started."></textarea></div>
+    <button class="btn primary" type="submit">Raise ticket</button></form></section>
+  <section class="panel"><div class="panel-head"><h2>${staff?"Ticket queue":"Your tickets"}</h2><div class="seg" role="group" aria-label="Which tickets">${[["active","Active"],["resolved","Resolved"],["all","All"]].map(([k,l])=>`<button data-tickf="${k}" aria-pressed="${state.tickF===k}">${l}</button>`).join("")}</div></div>
+    ${list.length?`<div class="tbl-wrap"><table><thead><tr><th>Ticket</th><th>Site</th><th>Status</th><th>Raised</th></tr></thead><tbody>${list.map(t=>{const s=t.site&&siteById(t.site);return`<tr class="click" data-ticket="${t.id}" tabindex="0"><td><div class="site-name">${esc(t.subject)}</div><div class="sub">${t.id} · ${esc(t.cat)}</div></td><td>${s?esc(s.name):'<span class="muted">General</span>'}</td><td><span class="chip ${TSTATUS[t.status][1]}">${TSTATUS[t.status][0]}</span></td><td class="sub">${t.when}<div>${esc((USERS.find(u=>u.id===t.by)||{name:""}).name)}</div></td></tr>`}).join("")}</tbody></table></div>`:`<p class="muted">No tickets here. Raise one if something needs attention.</p>`}
+  </section></div>`;
+}
+function ticketDrawer(id){
+  const t=TICKETS.find(x=>x.id===id),s=t.site&&siteById(t.site),staff=can("handle_tickets");
+  openDrawer(dHead(esc(t.subject),`${t.id} · ${esc(t.cat)}${s?" · "+esc(s.name):""}`)+
+  `<span><span class="chip ${TSTATUS[t.status][1]}">${TSTATUS[t.status][0]}</span></span>
+  <div class="conv">${t.msgs.map(m=>`<div class="msg ${m.auto?"auto":m.who===me().name?"mine":""}"><span class="sub"><b>${esc(m.who)}</b> · ${m.when}</span><p>${esc(m.text)}</p></div>`).join("")}</div>
+  ${t.status!=="resolved"?`<div class="field"><label for="treply">${staff?"Reply to the client":"Add a message"}</label><textarea id="treply" rows="3" placeholder="${staff?"What was found and what happens next":"If that did not solve it, tell us and we will send an engineer."}"></textarea></div>
+  <div class="filters"><button class="btn primary" data-treply="${t.id}">Send</button><button class="btn" data-tresolve="${t.id}">Mark resolved</button>${s?`<button class="btn" data-site="${s.id}">Open site</button>`:""}</div>`:`<p class="hint">This ticket is resolved. Raise a new one if the problem comes back.</p>`}`);
+}
+
+/* Subscriptions and renewals, with automatic downtime credit */
+function vRenewals(){
+  if(!can("manage_billing"))return pageHead("Renewals")+locked("Subscription renewals");
+  const within=state.renewF,all=scope().map(s=>({s,x:ext(s)})).sort((a,b)=>a.x.renew-b.x.renew);
+  const list=all.filter(r=>within==="all"||daysTo(r.x.renew)<=+within);const due=all.filter(r=>daysTo(r.x.renew)<=30);
+  return pageHead("Subscription renewals","Every day a site sends nothing pushes its renewal one day later, so downtime is credited automatically.",
+    `<div class="seg" role="group" aria-label="Due within">${[["30","30 days"],["90","90 days"],["all","All"]].map(([k,l])=>`<button data-renewf="${k}" aria-pressed="${within===k}">${l}</button>`).join("")}</div>`)+
+  `<div class="kpis kpis-4"><div class="kpi"><span class="eyebrow">Due in 30 days</span><span class="v num">${due.length}</span><span class="d">${fmtINR(due.reduce((a,r)=>a+r.x.fee,0))} in fees</span></div>
+    <div class="kpi"><span class="eyebrow">Unpaid this year</span><span class="v num">${all.filter(r=>!r.x.paid).length}</span><span class="d">of ${all.length} subscriptions</span></div>
+    <div class="kpi"><span class="eyebrow">Downtime credited</span><span class="v num">${all.reduce((a,r)=>a+r.x.credit,0)}<small>days</small></span><span class="d">across all sites</span></div>
+    <div class="kpi"><span class="eyebrow">Annual fees</span><span class="v num">${fmtINR(all.reduce((a,r)=>a+r.x.fee,0))}</span><span class="d">contracted</span></div></div>
+  <section class="panel"><div class="tbl-wrap"><table><thead><tr><th>Site</th><th>Renews</th><th class="r">Downtime credit</th><th class="r">Annual fee</th><th class="r">Tariff</th><th class="r">Diesel</th><th>Paid</th><th></th></tr></thead><tbody>
+  ${list.slice(0,100).map(({s,x})=>`<tr><td class="click" data-site="${s.id}" style="cursor:pointer"><div class="site-name">${esc(s.name)}</div><div class="sub">${esc(s.customer)}</div></td><td>${dfmt(x.renew)}<div class="sub ${daysTo(x.renew)<=20?"down":""}">in ${daysTo(x.renew)} days</div></td><td class="r num">${x.credit?"+"+x.credit+" d":"–"}</td><td class="r num">${fmtINR(x.fee)}</td><td class="r num">₹${(+s.tariff).toFixed(2)}</td><td class="r num">${x.hasDG?"₹"+(+x.dgTariff).toFixed(2):"–"}</td><td>${x.paid?'<span class="yes">Paid</span>':`<button class="btn primary" data-markpaid="${s.id}">Mark paid</button>`}</td><td><button class="btn" data-renewedit="${s.id}">Edit</button></td></tr>`).join("")||'<tr><td colspan="8" class="muted" style="padding:20px;text-align:center">Nothing due in this window.</td></tr>'}
+  </tbody></table></div>${list.length>100?`<p class="sub">Showing the first 100 of ${list.length}.</p>`:""}<p class="hint" style="margin-top:12px">The diesel rate is the cost of one unit from the generator. Solar made while the diesel set runs is valued at this rate instead of the grid tariff.</p></section>`;
+}
+function renewDrawer(id){
+  const s=siteById(id),x=ext(s);
+  openDrawer(dHead("Subscription: "+esc(s.name),`Renews ${dfmt(x.renew)} · ${x.credit} days of downtime credit`)+
+  `<form id="renewform" data-id="${s.id}" style="display:grid;gap:14px"><div class="field"><label for="rfee">Annual fee ₹</label><input id="rfee" type="number" min="0" step="500" value="${x.fee}"></div>
+  <div class="field"><label for="rtar">Grid tariff ₹/kWh</label><input id="rtar" type="number" min="0" step=".05" value="${s.tariff}"></div>
+  <div class="field"><label for="rdg">Diesel cost ₹/kWh</label><input id="rdg" type="number" min="0" step=".5" value="${x.dgTariff}" ${x.hasDG?"":"disabled"}><span class="sub">${x.hasDG?"Used to value solar made while the generator runs.":"This site has no diesel set."}</span></div>
+  <button class="btn primary" type="submit">Save</button></form>`);
+}
+
+/* Account: password, two-factor, theme */
+function pwRules(p){return[[p.length>=8,"At least 8 characters"],[/[a-z]/.test(p)&&/[A-Z]/.test(p),"Upper and lower case letters"],[/\d/.test(p),"At least one number"],[/[^A-Za-z0-9]/.test(p),"At least one symbol, like ! @ #"]]}
+function accountDrawer(){
+  const u=me();
+  openDrawer(dHead("Your account",`${esc(u.email)} · ${myRole().name}`)+
+  `<form id="pwform" style="display:grid;gap:12px"><h3>Change password</h3>
+    <div class="field"><label for="pwcur">Current password</label><input id="pwcur" type="password" autocomplete="current-password"></div>
+    <div class="field"><label for="pwnew">New password</label><input id="pwnew" type="password" autocomplete="new-password"><ul class="rules" id="pwrules">${pwRules("").map(([ok,l])=>`<li class="${ok?"yes":""}">${l}</li>`).join("")}</ul></div>
+    <div class="field"><label for="pwnew2">Type the new password again</label><input id="pwnew2" type="password" autocomplete="new-password"></div>
+    <label class="check-row"><input type="checkbox" id="pwshow"> Show passwords</label>
+    <button class="btn primary" type="submit">Change password</button></form>
+  <dl class="kv"><dt>Two-factor sign-in</dt><dd>${u.mfa?'<span class="yes">On</span> · authenticator app':'<span class="no">Off</span>'+(["platform_admin","customer_admin"].includes(u.role)?" · required for your role":"")}</dd><dt>Organisation</dt><dd>${esc(u.org)}</dd><dt>Sites you can see</dt><dd>${scope().length}</dd></dl>
+  <div class="field"><span style="font-weight:600">Theme</span><div class="seg" role="group" aria-label="Theme">${[["auto","Follow sunrise and sunset"],["light","Light"],["dark","Dark"]].map(([k,l])=>`<button type="button" data-themeopt="${k}" aria-pressed="${state.theme===k}">${l}</button>`).join("")}</div><span class="sub">Automatic switches to dark after sunset (18:06) and back at sunrise (06:15).</span></div>`);
+}
+function applyTheme(){const h=new Date().getHours()+new Date().getMinutes()/60;const t=state.theme==="auto"?(h>=SUN.rise&&h<SUN.set?"light":"dark"):state.theme;document.documentElement.dataset.theme=t;try{localStorage.setItem("helio-theme",state.theme)}catch(e){}}
+
+/* Single-site reports: daily, monthly, interval readings, and any logger parameters */
+const PARAMS=["Activ_pow","E_Today","PV1_V","PV1_C","Volt_R","Volt_Y","Volt_B","Curr_R","Freq","Temp_C","Grid Total_Pow","Grid Imp_KWh","Grid Exp_KWh","DG Total_Pow"];
+function siteReport(){
+  const r=state.rep,sc=scope(),s=siteById(r.site)&&sc.includes(siteById(r.site))?siteById(r.site):sc[0];if(!s)return{cols:[],rows:[],tot:[]};r.site=s.id;
+  const x=ext(s),fin=can("view_financials");
+  if(r.type==="daily"){const n=+r.range||30,h=energyHistory(s,"month").slice(30-n);
+    return{s,title:"Daily generation",cols:["Date","Solar kWh","Expected kWh","PR",...(x.hasMeter?["Grid kWh"]:[]),...(x.hasDG?["Diesel kWh"]:[]),...(fin?["Saved ₹"]:[])],
+      rows:h.map((p,i)=>[dlabel(DAYS[30-n+i]),Math.round(p.solar),Math.round(p.exp),p.gap?"no data":pct(p.solar/p.exp*.8),...(x.hasMeter?[Math.round(Math.abs(p.grid))]:[]),...(x.hasDG?[Math.round(p.dg)]:[]),...(fin?[fmtINR(p.solar*s.tariff)]:[])]),
+      tot:[["Solar",fmtE(h.reduce((a,p)=>a+p.solar,0))],["Expected",fmtE(h.reduce((a,p)=>a+p.exp,0))],...(x.hasDG?[["Diesel",fmtE(h.reduce((a,p)=>a+p.dg,0))]]:[])]}}
+  if(r.type==="monthly"){const h=energyHistory(s,"year");
+    return{s,title:"Monthly summary",cols:["Month","Solar kWh","Expected kWh","PR",...(x.hasDG?["Diesel kWh"]:[]),"Days with data",...(fin?["Saved ₹"]:[])],
+      rows:h.map((p,i)=>[p.label+" "+new Date(TODAY.getFullYear(),TODAY.getMonth()-11+i,1).getFullYear(),Math.round(p.solar).toLocaleString("en-IN"),Math.round(p.exp).toLocaleString("en-IN"),p.gap?"–":pct(p.solar/p.exp*.8),...(x.hasDG?[Math.round(p.dg).toLocaleString("en-IN")]:[]),p.gap?0:i===11?TODAY.getDate():new Date(TODAY.getFullYear(),TODAY.getMonth()-10+i,0).getDate(),...(fin?[fmtINR(p.solar*s.tariff)]:[])]),
+      tot:[["Solar, 12 months",fmtE(h.reduce((a,p)=>a+p.solar,0))],["Expected",fmtE(h.reduce((a,p)=>a+p.exp,0))]]}}
+  const d=dayProfile(s),step=r.interval==="60"?4:1,pts=d.filter((_,i)=>i%step===0),tm=p=>`${String(Math.floor(p.t)).padStart(2,"0")}:${String(Math.round(p.t%1*60)).padStart(2,"0")}`;
+  if(r.type==="interval")return{s,title:"Interval readings, today",cols:["Time","Solar kW",...(x.hasMeter?["Grid kW"]:[]),...(x.hasDG?["Diesel kW"]:[]),...(x.exportOnly?[]:["Site load kW"])],
+    rows:pts.map(p=>[tm(p),p.solar.toFixed(1),...(x.hasMeter?[p.grid.toFixed(1)]:[]),...(x.hasDG?[p.dg.toFixed(1)]:[]),...(x.exportOnly?[]:[p.load.toFixed(1)])]),tot:[["Readings",pts.length],["Peak solar",fmtKW(Math.max(...pts.map(p=>p.solar)))]]};
+  const sel=r.params.length?r.params:["Activ_pow","Volt_R","Freq"],rr=mulberry32(s.idx+9);
+  const val=(k,p)=>({Activ_pow:p.solar/s.inv,E_Today:(s.todayE||0)/s.inv*p.t/NOW_H,PV1_V:p.solar>0?560+rr()*80:0,PV1_C:p.solar/s.inv*1000/600/2,Volt_R:230+rr()*8,Volt_Y:231+rr()*8,Volt_B:229+rr()*8,Curr_R:p.solar/s.inv*1000/690,Freq:49.9+rr()*.2,Temp_C:30+p.solar/s.cap*30,"Grid Total_Pow":p.grid,"Grid Imp_KWh":Math.max(p.grid,0)/4,"Grid Exp_KWh":Math.max(-p.grid,0)/4,"DG Total_Pow":p.dg})[k];
+  return{s,title:"Parameter report, today (INV-01 and meters)",cols:["Time",...sel],rows:pts.map(p=>[tm(p),...sel.map(k=>(+val(k,p)).toFixed(2))]),tot:[["Parameters",sel.length],["Readings",pts.length]]};
+}
+function vSiteReport(){
+  const r=state.rep,exp=can("export_reports"),dev=can("view_devices"),{s,title,cols,rows,tot}=siteReport();if(!s)return`<p class="muted">No sites in your access.</p>`;
+  const types=[["daily","Daily generation"],["monthly","Monthly summary"],["interval","Interval readings"],...(dev?[["params","Parameter report"]]:[])];if(!types.some(t=>t[0]===r.type))r.type="daily";
+  return`<section class="panel"><div class="filters">
+    <label class="field" style="grid-template-columns:auto minmax(0,1fr);align-items:center;flex:1 1 260px">Site <select id="rsite">${scope().slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>`<option value="${x.id}" ${x.id===s.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select></label>
+    <label class="field" style="grid-template-columns:auto auto;align-items:center">Report <select id="rtype">${types.map(([k,l])=>`<option value="${k}" ${r.type===k?"selected":""}>${l}</option>`).join("")}</select></label>
+    ${r.type==="daily"?`<div class="seg" role="group" aria-label="Quick date ranges">${[["2","This month"],["7","Last 7 days"],["30","Last 30 days"]].map(([k,l])=>`<button data-rrange="${k}" aria-pressed="${String(r.range)===k}">${l}</button>`).join("")}</div>`:""}
+    ${["interval","params"].includes(r.type)?`<div class="seg" role="group" aria-label="Interval">${[["15","Every 15 minutes"],["60","Hourly"]].map(([k,l])=>`<button data-rint="${k}" aria-pressed="${r.interval===k}">${l}</button>`).join("")}</div>`:""}
+  </div>${r.type==="params"?`<div class="field" style="margin-top:12px"><span style="font-weight:600">Pick the parameters to include</span><div class="checks params">${PARAMS.map(p=>`<label><input type="checkbox" data-param="${p}" ${(r.params.length?r.params:["Activ_pow","Volt_R","Freq"]).includes(p)?"checked":""}> <span class="mono">${p}</span></label>`).join("")}</div></div>`:""}</section>
+  <div class="kpis kpis-4">${tot.map(([l,v])=>`<div class="kpi"><span class="eyebrow">${l}</span><span class="v num">${v}</span><span class="d">${esc(s.name)}</span></div>`).join("")}</div>
+  <section class="panel"><div class="panel-head"><div><h2>${title}</h2><span class="sub">${rows.length} rows · times are IST</span></div>${exp?`<div class="seg" role="group" aria-label="Download report"><button data-dl="pdf">PDF</button><button data-dl="xlsx">Excel</button><button data-dl="csv">CSV</button></div>`:""}</div>
+  <div class="tbl-wrap" style="max-height:480px"><table><thead><tr>${cols.map((c,i)=>`<th class="${i?"r":""}">${esc(c)}</th>`).join("")}</tr></thead><tbody>${rows.map(rw=>`<tr>${rw.map((v,i)=>`<td class="${i?"r num":""}">${v}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+  <p class="hint" style="margin-top:12px">${exp?"PDF and Excel include a chart; Excel keeps live formulas. ":`Downloads are not part of the ${myRole().name} role. `}Solar energy comes from the inverter daily counters.${r.type==="interval"?" Interval readings are limited to 62 days per download.":""}</p></section>`;
+}
+
 /* ---------- Render + events ---------- */
 let toastT;function toast(m){clearTimeout(toastT);let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";t.setAttribute("role","status");document.body.appendChild(t)}t.textContent=m;toastT=setTimeout(()=>t.remove(),2600)}
 function log(action,target){AUDIT.push({when:new Date(TODAY.getTime()+NOW_H*3600e3+AUDIT.length*1000),actor:me().name,action,target,ip:"49.36.88.10"})}
-const VIEWS={siteForm:vSiteForm,overview:vOverview,sites:vSites,site:vSite,reports:vReports,alarms:vAlarms,users:vUsers,groups:vGroups,roles:vRoles,audit:vAudit};
+const VIEWS={siteForm:vSiteForm,overview:vOverview,sites:vSites,site:vSite,reports:vReports,alarms:vAlarms,support:vSupport,renewals:vRenewals,users:vUsers,groups:vGroups,roles:vRoles,audit:vAudit};
 function render(){
   const root=document.getElementById("root");
   if(!state.loggedIn){root.innerHTML=vLogin();drawSky();return}
@@ -889,9 +1211,26 @@ function drawSky(){const c=document.getElementById("sky");if(!c)return;const r=c
   for(let i=0;i<SITES.length;i++){const s=SITES[i];const px=(s.lng-68)/25*r.width,py=(32-s.lat)/24.5*r.height;x.globalAlpha=.25+rr()*.5;x.fillStyle=col;x.beginPath();x.arc(px,py,1.5+Math.sqrt(s.cap)/20,0,7);x.fill()}}
 
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-nav],[data-site],[data-action],[data-sort],[data-page],[data-statusjump],[data-alarmf],[data-ack],[data-period],[data-by],[data-utab],[data-gtab],[data-user],[data-ug],[data-sg],[data-approve],[data-reject],[data-saveuser],[data-suspend],[data-resend],[data-saveug],[data-persona],[data-gres]");
+  const t=e.target.closest("[data-nav],[data-site],[data-action],[data-sort],[data-page],[data-statusjump],[data-alarmf],[data-ack],[data-period],[data-by],[data-utab],[data-gtab],[data-user],[data-ug],[data-sg],[data-approve],[data-reject],[data-saveuser],[data-suspend],[data-resend],[data-saveug],[data-persona],[data-gres],[data-diag],[data-crange],[data-src],[data-ticket],[data-tickf],[data-treply],[data-tresolve],[data-renewf],[data-renewedit],[data-markpaid],[data-themeopt],[data-rmode],[data-rrange],[data-rint],[data-dl]");
   if(!t)return;const d=t.dataset;
   if(d.nav)return go(d.nav);
+  if(d.diag){state.diag=d.diag;return render()}
+  if(d.crange){state.chartRange=d.crange;return render()}
+  if(d.src){state.hideSrc[d.src]=!state.hideSrc[d.src];return render()}
+  if(d.ticket)return ticketDrawer(d.ticket);
+  if(d.tickf){state.tickF=d.tickf;return render()}
+  if(d.treply){const t=TICKETS.find(x=>x.id===d.treply),v=document.getElementById("treply").value.trim();if(!v){toast("Write a message first");return}
+    t.msgs.push({who:me().name,text:v,when:"just now"});t.status=can("handle_tickets")&&t.by!==me().id?"answered":"open";log("Replied to ticket",`${t.id} ${t.subject}`);toast("Message sent");render();return ticketDrawer(t.id)}
+  if(d.tresolve){const t=TICKETS.find(x=>x.id===d.tresolve);t.status="resolved";t.msgs.push({who:me().name,text:"Marked as resolved.",when:"just now"});log("Resolved ticket",`${t.id} ${t.subject}`);closeDrawer();toast("Ticket resolved");return render()}
+  if(d.renewf){state.renewF=d.renewf;return render()}
+  if(d.renewedit)return renewDrawer(d.renewedit);
+  if(d.markpaid){const s=siteById(d.markpaid),x=ext(s);if(!confirm(`Record payment for ${s.name}? The next subscription year starts from the renewal date.`))return;x.paid=true;log("Recorded payment",`${s.id} ${s.name} ${fmtINR(x.fee)}`);toast("Payment recorded");return render()}
+  if(d.themeopt){state.theme=d.themeopt;applyTheme();render();return accountDrawer()}
+  if(d.rmode){state.rep.mode=d.rmode;return render()}
+  if(d.rrange){state.rep.range=d.rrange;return render()}
+  if(d.rint){state.rep.interval=d.rint;return render()}
+  if(d.dl){const{s,cols,rows}=siteReport();if(d.dl==="csv"){const csv=[cols,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+      navigator.clipboard.writeText(csv).then(()=>toast(`Copied ${rows.length} rows as CSV`)).catch(()=>toast("Clipboard is blocked here"))}else toast(`The ${d.dl==="pdf"?"PDF":"Excel file"} for ${s.name} would download here`);log("Exported report",`${s.id} ${state.rep.type}, ${rows.length} rows`);return}
   if(d.gres){document.getElementById("gresults").innerHTML="";return go("site",{siteId:d.gres})}
   if(d.site)return go("site",{siteId:d.site});
   if(d.statusjump)return go("sites",{sitesStatus:d.statusjump,page:0});
@@ -919,7 +1258,9 @@ document.addEventListener("click",e=>{
   const a=d.action;
   if(a==="close")return closeDrawer();
   if(a==="logout"){state.loggedIn=false;return render()}
-  if(a==="theme"){const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark";return}
+  if(a==="theme"){state.theme={auto:"light",light:"dark",dark:"auto"}[state.theme];applyTheme();toast({auto:"Theme follows sunrise and sunset",light:"Theme: always light",dark:"Theme: always dark"}[state.theme]);return render()}
+  if(a==="account")return accountDrawer();
+  if(a==="numbers"){state.showNums=!state.showNums;return render()}
   if(a==="invite")return inviteDrawer();
   if(a==="schedule")return scheduleDrawer();
   if(a==="request"){e.preventDefault();toast("The request form would open here");return}
@@ -929,24 +1270,40 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{
   const id=e.target.id;
-  if(id==="persona"){state.me=e.target.value;scopeCache=null;const v=state.view;return go(["users","groups","roles","audit"].includes(v)?v:v==="site"?"overview":v,{sitesGroup:"all",rep:{...state.rep,scope:"all"},page:0})}
+  if(id==="persona"){state.me=e.target.value;scopeCache=null;const v=state.view;return go(["users","groups","roles","audit","support","renewals","reports","alarms"].includes(v)?v:v==="site"?"overview":v,{sitesGroup:"all",rep:{...state.rep,scope:"all"},page:0})}
   if(id==="fstatus"){state.sitesStatus=e.target.value;state.page=0;return render()}
   if(id==="fregion"){state.sitesRegion=e.target.value;state.page=0;return render()}
   if(id==="ftype"){state.sitesType=e.target.value;state.page=0;return render()}
   if(id==="fgroup"){state.sitesGroup=e.target.value;state.page=0;return render()}
   if(id==="rscope"){state.rep.scope=e.target.value;return render()}
+  if(id==="rsite"){state.rep.site=e.target.value;return render()}
+  if(id==="rtype"){state.rep.type=e.target.value;return render()}
+  if(e.target.dataset.param){const p=e.target.dataset.param,cur=state.rep.params.length?state.rep.params:["Activ_pow","Volt_R","Freq"];state.rep.params=e.target.checked?[...cur.filter(x=>x!==p),p]:cur.filter(x=>x!==p);if(!state.rep.params.length){state.rep.params=[p];toast("Keep at least one parameter")}return render()}
+  if(id==="pwshow"){["pwcur","pwnew","pwnew2"].forEach(k=>document.getElementById(k).type=e.target.checked?"text":"password");return}
   if(e.target.dataset.perm){const[rid,p]=e.target.dataset.perm.split("|");const r=roleById(rid);r.perms=e.target.checked?[...r.perms,p]:r.perms.filter(x=>x!==p);log("Changed role permission",`${r.name}: ${e.target.checked?"granted":"removed"} "${PERMS.find(x=>x[0]===p)[1]}"`);toast("Role updated");if(rid===me().role)render()}
 });
 let typeT;
 document.addEventListener("input",e=>{
   const id=e.target.id;
   if(id==="sq"||id==="uq"){clearTimeout(typeT);typeT=setTimeout(()=>{if(id==="sq"){state.sitesQ=e.target.value;state.page=0}else state.userQ=e.target.value;const pos=e.target.selectionStart;render();const el=document.getElementById(id);el.focus();el.setSelectionRange(pos,pos)},180)}
+  if(id==="pwnew"){document.getElementById("pwrules").innerHTML=pwRules(e.target.value).map(([ok,l])=>`<li class="${ok?"yes":""}">${l}</li>`).join("")}
   if(id==="gsearch"){const q=e.target.value.toLowerCase().trim();const box=document.getElementById("gresults");if(!q){box.innerHTML="";return}
     const hits=scope().filter(s=>(s.name+s.city+s.customer+s.id).toLowerCase().includes(q)).slice(0,8);
     box.innerHTML=`<div class="search-results">${hits.map(s=>`<button data-gres="${s.id}"><span>${esc(s.name)}<div class="sub">${s.city} · ${s.id}</div></span>${statusChip(s.status)}</button>`).join("")||'<div style="padding:10px 12px" class="muted">No sites in your access match.</div>'}</div>`}
 });
 document.addEventListener("submit",e=>{
   e.preventDefault();const f=e.target;
+  if(f.id==="ticketform"){const sub=document.getElementById("tsub").value.trim(),body=document.getElementById("tbody").value.trim(),sid=document.getElementById("tsite").value,cat=document.getElementById("tcat").value;
+    if(!sub){toast("Please add a short subject");return}if(!body){toast("Please describe what is happening");return}
+    const s=sid&&siteById(sid),t={id:"T-"+(1041+TICKETS.length),site:sid||null,cat,subject:sub,status:"open",by:me().id,when:"just now",msgs:[{who:me().name,text:body,when:"just now"},{who:"Automatic check",auto:true,text:s?autoCheck(s,cat):"Sent to an administrator, who will reply here.",when:"just now"}]};
+    if(s&&s.status==="online"&&!cat.includes("faulty")&&!inverters(s).some(v=>v.st!=="ok"))t.status="answered";
+    TICKETS.unshift(t);log("Raised ticket",`${t.id} ${sub}`);state.tickF="active";render();toast(t.status==="answered"?"Answered automatically":"Ticket raised");return ticketDrawer(t.id)}
+  if(f.id==="renewform"){const s=siteById(f.dataset.id),x=ext(s),fee=+document.getElementById("rfee").value,tar=+document.getElementById("rtar").value,dg=+document.getElementById("rdg").value;
+    if(!(fee>=0&&tar>0)){toast("Enter a fee and a tariff above zero");return}const ch=[];if(fee!==x.fee)ch.push(`fee ${fmtINR(x.fee)} → ${fmtINR(fee)}`);if(tar!==s.tariff)ch.push(`tariff ₹${s.tariff} → ₹${tar}`);if(x.hasDG&&dg!==x.dgTariff)ch.push(`diesel ₹${x.dgTariff} → ₹${dg}`);
+    x.fee=fee;s.tariff=tar;if(x.hasDG)x.dgTariff=dg;log("Edited subscription",`${s.id} ${ch.join(", ")||"no changes"}`);closeDrawer();toast("Saved");return render()}
+  if(f.id==="pwform"){const cur=document.getElementById("pwcur").value,nw=document.getElementById("pwnew").value,nw2=document.getElementById("pwnew2").value;
+    if(!cur){toast("Enter your current password");return}if(pwRules(nw).some(r=>!r[0])){toast("The new password does not meet every rule yet");return}if(nw!==nw2){toast("The two new passwords do not match");return}
+    log("Changed password",me().email);closeDrawer();toast("Password changed. Other sessions were signed out");return}
   if(f.id==="loginform"){toast("Pick a demo person to sign in");return}
   if(f.id==="schedform"){log("Scheduled report",document.getElementById("sfreq").value);closeDrawer();toast("Report scheduled");return}
   if(f.id==="inviteform"){const name=document.getElementById("iname").value.trim(),email=document.getElementById("iemail").value.trim();if(!name||!email)return;
@@ -1004,5 +1361,7 @@ function sfInput(e){
   if(e.type==="change"&&t.hasAttribute("data-rr")){if(p==="city"){const c=CITIES.find(x=>x[0]===v);Object.assign(d,{state:c[1],region:c[2],lat:c[3],lng:c[4]})}sfRender(t.type==="radio"?null:t.id)}
 }
 document.addEventListener("input",sfInput);document.addEventListener("change",sfInput);
+try{const t=localStorage.getItem("helio-theme");if(["auto","light","dark"].includes(t))state.theme=t}catch(e){}
+applyTheme();setInterval(()=>{if(state.theme==="auto")applyTheme()},6e4);
 render();
 </script>
